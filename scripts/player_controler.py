@@ -21,6 +21,9 @@ class Player:
 
         self.gravity: float = 2.2
 
+        self.have_flashlight: bool = False
+        self.use_flashlight: bool = True
+
     def update(self):
 
         self.angle_y -= INPUT.rel[0] * DISPLAY.delta_time

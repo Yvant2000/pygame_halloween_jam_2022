@@ -1,3 +1,5 @@
+from math import sin, cos, radians, pi
+
 from pygame import Surface
 
 from scripts.player_controler import Player
@@ -67,6 +69,23 @@ class GAME_LOGIC:
         cls.PLAYER.update()
 
         cls.SURFACE.fill((0, 0, 0))
+
+        cls.RAY_CASTER.clear_lights()
+        # {"x", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
+        cls.RAY_CASTER.add_light(
+            cls.PLAYER.x, cls.PLAYER.height, cls.PLAYER.z,
+            3.,
+            0.15, 0.07, 0.05,
+        )
+        if cls.PLAYER.use_flashlight:
+            cls.RAY_CASTER.add_light(
+                cls.PLAYER.x, cls.PLAYER.y + cls.PLAYER.height, cls.PLAYER.z,
+                DISPLAY.VIEW_DISTANCE, 0.5, 0.6, 0.7,
+                direction_x=cls.PLAYER.x + cos(radians(cls.PLAYER.angle_y)) * DISPLAY.VIEW_DISTANCE * 1.8,
+                direction_y=cls.PLAYER.y + cls.PLAYER.height + sin(radians(cls.PLAYER.angle_x)) * DISPLAY.VIEW_DISTANCE * 1.8,
+                direction_z=cls.PLAYER.z + sin(radians(cls.PLAYER.angle_y)) * DISPLAY.VIEW_DISTANCE * 1.8,
+                )
+
         # {"dst_surface", "x", "y", "z", "angle_x", "angle_y", "fov", "view_distance", "rad", NULL};
         cls.RAY_CASTER.raycasting(
             cls.SURFACE,
