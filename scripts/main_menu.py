@@ -1,9 +1,9 @@
 
 from pygame import Surface
 
-from scripts.utils import load_image
 from scripts.display import DISPLAY
 from scripts.input_handler import INPUT
+from scripts.utils import load_image, GameState
 
 
 class Button:
@@ -28,7 +28,8 @@ class MAIN_MENU:
         Button("quit", 243, 260)
     ]
 
-    pressing: bool = False
+    pressing_up: bool = False
+    pressing_down: bool = False
 
     @classmethod
     def update(cls) -> None:
@@ -40,6 +41,26 @@ class MAIN_MENU:
                 button.pos
             )
 
-        if INPUT.up():
-            cls.selected_button = (selected_button - 1) % len(cls.BUTTONS)
+        if INPUT.confirm():
+            from scripts.game import GAME
+            match cls.selected_button:
+                case 0:
+                    GAME.state = GameState.PLAYING
+                case 1:
+                    raise NotImplementedError  # TODO: Implement endless mode
+                case 2:  # QUIT BUTTON
+                    GAME.state = GameState.QUIT
 
+        elif INPUT.up():
+            if not cls.pressing_up:
+                cls.selected_button = (cls.selected_button - 1) % len(cls.BUTTONS)
+                cls.pressing_up = True
+        else:
+            cls.pressing_up = False
+
+            if INPUT.down():
+                if not cls.pressing_down:
+                    cls.selected_button = (cls.selected_button + 1) % len(cls.BUTTONS)
+                    cls.pressing_down = True
+            else:
+                cls.pressing_down = False

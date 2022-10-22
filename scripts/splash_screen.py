@@ -50,7 +50,7 @@ class SplashScreen:
 
         @return: True if all the images have been displayed, False otherwise.
         """
-        if self._counter <= 0. or INPUT.skip():
+        if self._counter <= 0. or INPUT.confirm():
             if self.next():
                 return True
             self._counter = SplashScreen.SPLASH_DURATION

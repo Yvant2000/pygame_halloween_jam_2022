@@ -1,4 +1,3 @@
-from enum import Enum, auto
 
 
 from pygame import event as pg_event, QUIT
@@ -8,12 +7,7 @@ from scripts.display import DISPLAY
 from scripts.input_handler import INPUT
 from scripts.splash_screen import SPLASH_SCREEN
 from scripts.main_menu import MAIN_MENU
-
-
-class GameState(Enum):
-    SPLASH_SCREEN = auto()
-    MAIN_MENU = auto()
-    QUIT = auto()
+from scripts.utils import GameState
 
 
 # noinspection PyClassHasNoInit
@@ -36,8 +30,12 @@ class GAME:
                 case GameState.SPLASH_SCREEN:
                     if SPLASH_SCREEN.update():
                         cls.state = GameState.MAIN_MENU
+
                 case GameState.MAIN_MENU:
                     MAIN_MENU.update()
+
+                case GameState.PLAYING:
+                    print("Wow, I'm playing rn!")
 
             DISPLAY.update()
 

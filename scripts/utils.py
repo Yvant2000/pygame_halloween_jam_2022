@@ -1,10 +1,19 @@
 from typing import Generator
+from enum import Enum, auto
 
 from os.path import join as join_path
 from os import listdir
 
 from pygame import Surface
 from pygame.image import load as pg_image_load
+
+
+class GameState(Enum):
+    SPLASH_SCREEN = auto()
+    MAIN_MENU = auto()
+    QUIT = auto()
+    PLAYING = auto()
+    GAME_OVER = auto()
 
 
 def load_image(*path: str) -> Surface:
