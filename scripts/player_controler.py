@@ -5,9 +5,6 @@ from scripts.input_handler import INPUT
 from scripts.utils import line_point_distance
 
 
-from nostalgiaeraycasting import RayCaster
-
-
 class Player:
     def __init__(self):
         self.x: float = 0
@@ -17,7 +14,7 @@ class Player:
         self.angle_x: float = 0
         self.angle_y: float = 90
 
-        self.walk_speed: float = 1.1
+        self.walk_speed: float = 0.9
         self.run_speed: float = 1.6
         self.height: float = 1.3
 
@@ -74,7 +71,7 @@ class Player:
             sin(radians(self.angle_y))
         )
 
-    def is_looking_at(self, pos: tuple[int, int, int], error_dist: float = 1.) -> bool:
+    def is_looking_at(self, pos: tuple[float, float, float], error_dist: float = 0.8) -> bool:
         dist = line_point_distance(pos, self.pos, self.look_direction)
         return dist < error_dist
 
