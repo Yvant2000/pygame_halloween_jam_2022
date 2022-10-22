@@ -7,6 +7,7 @@ from pygame import event as pg_event, QUIT
 from scripts.display import DISPLAY
 from scripts.input_handler import INPUT
 from scripts.splash_screen import SPLASH_SCREEN
+from scripts.main_menu import MAIN_MENU
 
 
 class GameState(Enum):
@@ -15,6 +16,7 @@ class GameState(Enum):
     QUIT = auto()
 
 
+# noinspection PyClassHasNoInit
 class GAME:
     state: GameState = GameState.SPLASH_SCREEN
 
@@ -35,7 +37,7 @@ class GAME:
                     if SPLASH_SCREEN.update():
                         cls.state = GameState.MAIN_MENU
                 case GameState.MAIN_MENU:
-                    ...
+                    MAIN_MENU.update()
 
             DISPLAY.update()
 
