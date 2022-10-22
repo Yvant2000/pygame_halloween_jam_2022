@@ -12,6 +12,8 @@ class DISPLAY:
     screen: Surface = pg_display.set_mode(screen_size, FULLSCREEN | SCALED)  # 360p go brrrrrr
     CLOCK: Clock = Clock()
     FPS: int = 30
+    FOV: float = 60.
+    VIEW_DISTANCE: float = 6.
     delta_time: float = 0.  # Time since the last frame in seconds
 
     @classmethod
@@ -22,4 +24,8 @@ class DISPLAY:
     @classmethod
     def display(cls, surface: Surface):
         cls.screen.blit(surface, (0, 0))
+
+    @classmethod
+    def display_scaled(cls, surface: Surface):
+        scale(surface, cls.screen_size, cls.screen)
 

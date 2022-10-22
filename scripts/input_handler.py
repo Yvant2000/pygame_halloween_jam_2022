@@ -1,18 +1,26 @@
 from typing import Sequence
 
 from pygame import key as pg_key
-from pygame import K_RETURN, K_SPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_w, K_a, K_d, K_s
+from pygame import K_RETURN, K_SPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_w, K_a, K_d, K_s, K_LSHIFT, K_LCTRL
+from pygame import mouse as pg_mouse
+
+from scripts.display import DISPLAY
 
 
-# noinspection PyClassHasNoInit
 class INPUT:
 
     _skip: bool = False
     keys: Sequence[bool] = {}
+    rel: tuple[int, int] = (0, 0)
 
     @classmethod
     def update(cls):
         cls.keys = pg_key.get_pressed()
+        cls.rel = pg_mouse.get_rel()
+
+        if pg_key.get_focused():
+            pg_mouse.set_visible(False)
+            pg_mouse.set_pos((DISPLAY.screen_size[0] // 2, DISPLAY.screen_size[1] // 2))
 
     @classmethod
     def confirm(cls) -> bool:
@@ -46,5 +54,10 @@ class INPUT:
     def right(cls) -> bool:
         return cls.keys[K_RIGHT] or cls.keys[K_d]
 
+    @classmethod
+    def jump(cls) -> bool:
+        return cls.keys[K_SPACE]
 
-
+    @classmethod
+    def sprint(cls) -> bool:
+        return cls.keys[K_LSHIFT] or cls.keys[K_LCTRL]

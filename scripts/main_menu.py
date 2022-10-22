@@ -17,7 +17,6 @@ class Button:
         return self.surface_selected if selected else self.surface
 
 
-# noinspection PyClassHasNoInit
 class MAIN_MENU:
     background_image: Surface = load_image("data", "main_menu", "background.png")
     selected_button: int = 0
@@ -43,8 +42,10 @@ class MAIN_MENU:
 
         if INPUT.confirm():
             from scripts.game import GAME
+            from scripts.game_logic import GAME_LOGIC
             match cls.selected_button:
                 case 0:
+                    GAME_LOGIC.reset()
                     GAME.state = GameState.PLAYING
                 case 1:
                     raise NotImplementedError  # TODO: Implement endless mode

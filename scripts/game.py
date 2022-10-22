@@ -7,10 +7,10 @@ from scripts.display import DISPLAY
 from scripts.input_handler import INPUT
 from scripts.splash_screen import SPLASH_SCREEN
 from scripts.main_menu import MAIN_MENU
+from scripts.game_logic import GAME_LOGIC
 from scripts.utils import GameState
 
 
-# noinspection PyClassHasNoInit
 class GAME:
     state: GameState = GameState.SPLASH_SCREEN
 
@@ -35,7 +35,7 @@ class GAME:
                     MAIN_MENU.update()
 
                 case GameState.PLAYING:
-                    print("Wow, I'm playing rn!")
+                    GAME_LOGIC.update()
 
             DISPLAY.update()
 
