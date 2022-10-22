@@ -1,7 +1,4 @@
-
-
 from pygame import event as pg_event, QUIT
-
 
 from scripts.display import DISPLAY
 from scripts.input_handler import INPUT
@@ -38,5 +35,3 @@ class GAME:
                     GAME_LOGIC.update()
 
             DISPLAY.update()
-
-
