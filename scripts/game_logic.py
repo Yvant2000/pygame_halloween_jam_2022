@@ -5,7 +5,10 @@ from pygame import Surface
 from scripts.player_controler import Player
 from scripts.display import DISPLAY
 from scripts.text import TEXT
+from scripts.input_handler import INPUT
 from scripts.surface_loader import load_static_surfaces
+from scripts.interactions import *
+from scripts.visuals import hand_visual
 
 from nostalgiaeraycasting import RayCaster
 
@@ -21,6 +24,8 @@ class GAME_LOGIC:
     remaining_time: float
     time_stopped: bool
 
+    interaction_list: list[Interaction]
+
     @classmethod
     def reset(cls):
         cls.PLAYER = Player()
@@ -29,22 +34,40 @@ class GAME_LOGIC:
 
         load_static_surfaces(cls.RAY_CASTER)
 
-        hour = 0
-        remaining_time = cls.HOUR_DURATION
-        time_stopped = False
+        cls.hour = 0
+        cls.remaining_time = cls.HOUR_DURATION
+        cls.time_stopped = False
+
+        cls.interaction_list = [
+            Test_Interaction((-2, 0, -3))
+        ]
+
+        TEXT.add("Inspect the room.")
 
     @classmethod
     def update(cls) -> None:
 
         cls.PLAYER.update()
+        cls.display()
+
+        for interaction in cls.interaction_list:
+            if interaction.can_interact(cls.PLAYER):
+                DISPLAY.screen.blit(
+                    hand_visual, (DISPLAY.screen_size[0] // 2 - hand_visual.get_width() // 2,
+                                  DISPLAY.screen_size[1] // 2 - hand_visual.get_height() // 2)
+                )
+                if INPUT.interact():
+                    interaction.interact(cls.PLAYER)
+                break
+
+        for interaction in cls.interaction_list:
+            interaction.update()
 
         if not cls.time_stopped:
             cls.remaining_time -= DISPLAY.delta_time
             if cls.remaining_time <= 0:
                 cls.hour += 1
                 cls.remaining_time = cls.HOUR_DURATION
-
-        cls.display()
 
     @classmethod
     def display(cls) -> None:
@@ -63,9 +86,11 @@ class GAME_LOGIC:
                 cls.PLAYER.x, cls.PLAYER.y + cls.PLAYER.height, cls.PLAYER.z,
                 DISPLAY.VIEW_DISTANCE, 0.5, 0.6, 0.7,
                 direction_x=cls.PLAYER.x + cos(radians(cls.PLAYER.angle_y)) * DISPLAY.VIEW_DISTANCE * 1.8,
-                direction_y=cls.PLAYER.y + cls.PLAYER.height + sin(radians(cls.PLAYER.angle_x)) * DISPLAY.VIEW_DISTANCE * 1.8,
+                direction_y=cls.PLAYER.y + cls.PLAYER.height + sin(
+                    radians(cls.PLAYER.angle_x)
+                ) * DISPLAY.VIEW_DISTANCE * 1.8,
                 direction_z=cls.PLAYER.z + sin(radians(cls.PLAYER.angle_y)) * DISPLAY.VIEW_DISTANCE * 1.8,
-                )
+            )
 
         # {"dst_surface", "x", "y", "z", "angle_x", "angle_y", "fov", "view_distance", "rad", NULL};
         cls.RAY_CASTER.raycasting(

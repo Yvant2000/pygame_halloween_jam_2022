@@ -8,7 +8,7 @@ from scripts.display import DISPLAY
 class TextMessage:
     def __init__(self, text, duration: float = 5., fade_out: float = 1.0,
                  font: str = "PressStart2P", color: tuple[int, int, int] = (255, 255, 255), size: int = 16,
-                 y: int = 300):
+                 y: int = 330):
         self.duration: float = duration
         self.fade_out: float = fade_out
 

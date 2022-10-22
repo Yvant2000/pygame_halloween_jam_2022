@@ -2,6 +2,10 @@ from math import sin, cos, radians
 
 from scripts.display import DISPLAY
 from scripts.input_handler import INPUT
+from scripts.utils import line_point_distance
+
+
+from nostalgiaeraycasting import RayCaster
 
 
 class Player:
@@ -23,6 +27,12 @@ class Player:
 
         self.have_flashlight: bool = False
         self.use_flashlight: bool = True
+
+        self.look_direction: tuple[float, float, float] = (0, 0, 0)
+
+    @property
+    def pos(self) -> tuple[float, float, float]:
+        return self.x, self.y + self.height, self.z
 
     def update(self):
 
@@ -57,3 +67,17 @@ class Player:
         if self.y < 0:
             self.y = 0
             self._jump_speed = 0
+
+        self.look_direction = (
+            cos(radians(self.angle_y)),
+            sin(radians(self.angle_x)),
+            sin(radians(self.angle_y))
+        )
+
+    def is_looking_at(self, pos: tuple[int, int, int], error_dist: float = 1.) -> bool:
+        dist = line_point_distance(pos, self.pos, self.look_direction)
+        return dist < error_dist
+
+
+
+
