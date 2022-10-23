@@ -1,7 +1,8 @@
 from typing import Sequence
 
 from pygame import key as pg_key
-from pygame import K_RETURN, K_SPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_w, K_a, K_d, K_s, K_LSHIFT, K_LCTRL, K_e
+from pygame import event as pg_event
+from pygame import K_RETURN, K_SPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_w, K_a, K_d, K_s, K_LSHIFT, K_LCTRL, K_e, K_f
 from pygame import mouse as pg_mouse
 
 from scripts.display import DISPLAY
@@ -11,6 +12,7 @@ class INPUT:
 
     _skip: bool = False
     _interact: bool = False
+    _flash_light: bool = False
     keys: Sequence[bool] = {}
     mouse_pressed: tuple[bool, bool, bool] = (False, False, False)
     rel: tuple[int, int] = (0, 0)
@@ -24,8 +26,10 @@ class INPUT:
             pg_mouse.set_visible(False)
             pg_mouse.set_pos((DISPLAY.screen_size[0] // 2, DISPLAY.screen_size[1] // 2))
             cls.mouse_pressed = pg_mouse.get_pressed()
+            pg_event.set_grab(True)
         else:
             cls.rel = (0, 0)
+            pg_event.set_grab(False)
             pg_mouse.set_visible(True)
 
     @classmethod
@@ -79,4 +83,17 @@ class INPUT:
             return True
 
         cls._interact = False
+        return False
+
+    @classmethod
+    def flash_light(cls) -> bool:
+
+        if cls.keys[K_f] or pg_mouse.get_pressed()[2]:
+            if cls._flash_light:
+                return False
+
+            cls._flash_light = True
+            return True
+
+        cls._flash_light = False
         return False

@@ -7,6 +7,7 @@ from scripts.main_menu import MAIN_MENU
 from scripts.game_logic import GAME_LOGIC
 from scripts.game_over import GAME_OVER_SCREEN
 from scripts.utils import GameState
+from scripts.visuals import VISUALS
 
 
 class GAME:
@@ -28,6 +29,7 @@ class GAME:
                 case GameState.SPLASH_SCREEN:
                     if SPLASH_SCREEN.update():
                         cls.state = GameState.MAIN_MENU
+                        VISUALS.reset()
 
                 case GameState.MAIN_MENU:
                     MAIN_MENU.update()

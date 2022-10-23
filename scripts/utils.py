@@ -5,10 +5,21 @@ from enum import Enum, auto
 from os.path import join as join_path
 from os import listdir
 
-from pygame import Surface
+from pygame import Surface, Rect
 from pygame.image import load as pg_image_load
 
 from nostalgiaeraycasting import RayCaster
+
+
+MAP_COLLISIONS: tuple[Rect, ...] = (
+    Rect(-30, 35, 60, 10),  # bed side
+    Rect(-30, -40, 60, 10),  # back
+
+    Rect(-30, -50, 10, 90),  # left
+    Rect(25, -50, 10, 90),  # right
+
+    Rect(-7, 15, 16, 20),  # bed
+)
 
 
 class GameState(Enum):

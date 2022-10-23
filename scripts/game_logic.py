@@ -6,7 +6,7 @@ from scripts.text import TEXT
 from scripts.input_handler import INPUT
 from scripts.game_over import GAME_OVER_SCREEN
 from scripts.surface_loader import load_static_surfaces
-from scripts.interactions import Interaction, Test_Interaction
+from scripts.interactions import Interaction, Test_Interaction, BedsideLamp, Bed, FlashLight
 from scripts.monsters import Monster, Hangman
 from scripts.visuals import hand_visual, VISUALS
 from scripts.utils import GameState
@@ -36,6 +36,7 @@ class GAME_LOGIC:
         cls.ENDLESS = endless
 
         VISUALS.reset()
+        VISUALS.vignette = 5.
 
         cls.PLAYER = Player()
         cls.RAY_CASTER = RayCaster()
@@ -48,15 +49,19 @@ class GAME_LOGIC:
         cls.time_stopped = False
 
         cls.interaction_list = [
+            FlashLight((1, 0, -3)),
             Test_Interaction((0, 0, 0)),
+            BedsideLamp((2, 0, 3)),
+            Bed((0, 0.5, 3)),
         ]
 
         cls.monster_list = {
             "Hangman": Hangman(),
         }
-        # cls.monster_list["Hangman"].aggressiveness = 20
+        # cls.monster_list["Hangman"].aggressiveness = 1
 
-        TEXT.replace("Inspect the room.")
+        TEXT.replace("Inspect the room.", duration=2, fade_out=0)
+        TEXT.add("Interact with LEFT CLICK")
 
     @classmethod
     def update(cls) -> None:
@@ -64,15 +69,16 @@ class GAME_LOGIC:
         cls.PLAYER.update()
         cls.display()
 
-        for interaction in cls.interaction_list:
-            if interaction.can_interact(cls.PLAYER):
-                DISPLAY.screen.blit(
-                    hand_visual, (DISPLAY.screen_size[0] // 2 - hand_visual.get_width() // 2,
-                                  DISPLAY.screen_size[1] // 2 - hand_visual.get_height() // 2)
-                )
-                if INPUT.interact():
-                    interaction.interact(cls.PLAYER)
-                break
+        if not cls.PLAYER.in_bed:
+            for interaction in cls.interaction_list:
+                if interaction.can_interact(cls.PLAYER):
+                    DISPLAY.screen.blit(
+                        hand_visual, (DISPLAY.screen_size[0] // 2 - hand_visual.get_width() // 2,
+                                      DISPLAY.screen_size[1] // 2 - hand_visual.get_height() // 2)
+                    )
+                    if INPUT.interact():
+                        interaction.interact(cls.PLAYER)
+                    break
 
         for interaction in cls.interaction_list:
             interaction.update(cls.PLAYER)
@@ -87,6 +93,18 @@ class GAME_LOGIC:
                 cls.remaining_time = cls.HOUR_DURATION
 
     @classmethod
+    def hour_event(cls) -> None:
+        """
+        Called every hour.
+        Define the new events happening at each hour.
+        """
+        match cls.hour:
+            case 1:
+                ...
+            case _:
+                ...
+
+    @classmethod
     def display(cls) -> None:
 
         for monster in cls.monster_list.values():
@@ -98,28 +116,50 @@ class GAME_LOGIC:
         cls.RAY_CASTER.add_light(
             cls.PLAYER.x, cls.PLAYER.height, cls.PLAYER.z,
             3.,
-            0.15, 0.07, 0.05,
+            0.07, 0.07, 0.20,
         )
-        if cls.PLAYER.use_flashlight:
-            cls.RAY_CASTER.add_light(
-                cls.PLAYER.x, cls.PLAYER.y + cls.PLAYER.height, cls.PLAYER.z,
-                DISPLAY.VIEW_DISTANCE, 0.5, 0.6, 0.7,
-                direction_x=cls.PLAYER.x + cls.PLAYER.look_direction[0] * DISPLAY.VIEW_DISTANCE * 1.8,
-                direction_y=cls.PLAYER.y + cls.PLAYER.height + cls.PLAYER.look_direction[1] * DISPLAY.VIEW_DISTANCE * 1.8,
-                direction_z=cls.PLAYER.z + cls.PLAYER.look_direction[2] * DISPLAY.VIEW_DISTANCE * 1.8,
-            )
 
-        # {"dst_surface", "x", "y", "z", "angle_x", "angle_y", "fov", "view_distance", "rad", NULL};
-        cls.RAY_CASTER.raycasting(
-            cls.SURFACE,
-            cls.PLAYER.x,
-            cls.PLAYER.y + cls.PLAYER.height,
-            cls.PLAYER.z,
-            cls.PLAYER.angle_x,
-            cls.PLAYER.angle_y,
-            DISPLAY.FOV,
-            DISPLAY.VIEW_DISTANCE,
-        )
+        if cls.PLAYER.in_bed:
+            if cls.PLAYER.use_flashlight:
+                cls.RAY_CASTER.add_light(
+                    0, 0.5, 3.0,
+                    DISPLAY.VIEW_DISTANCE,
+                    0.5, 0.6, 0.7,
+                    direction_x=0,
+                    direction_y=1,
+                    direction_z=-3,
+                )
+
+            cls.RAY_CASTER.raycasting(
+                cls.SURFACE,
+                0, 0.5, 3.2,
+                10,
+                -90,
+                DISPLAY.FOV,
+                DISPLAY.VIEW_DISTANCE,
+            )
+        else:
+            if cls.PLAYER.use_flashlight:
+                cls.RAY_CASTER.add_light(
+                    cls.PLAYER.x, cls.PLAYER.y + cls.PLAYER.height, cls.PLAYER.z,
+                    DISPLAY.VIEW_DISTANCE, 0.5, 0.6, 0.7,
+                    direction_x=cls.PLAYER.x + cls.PLAYER.look_direction[0] * DISPLAY.VIEW_DISTANCE * 1.8,
+                    direction_y=cls.PLAYER.y + cls.PLAYER.height + cls.PLAYER.look_direction[
+                        1] * DISPLAY.VIEW_DISTANCE * 1.8,
+                    direction_z=cls.PLAYER.z + cls.PLAYER.look_direction[2] * DISPLAY.VIEW_DISTANCE * 1.8,
+                )
+
+            # {"dst_surface", "x", "y", "z", "angle_x", "angle_y", "fov", "view_distance", "rad", NULL};
+            cls.RAY_CASTER.raycasting(
+                cls.SURFACE,
+                cls.PLAYER.x,
+                cls.PLAYER.y + cls.PLAYER.height,
+                cls.PLAYER.z,
+                cls.PLAYER.angle_x,
+                cls.PLAYER.angle_y,
+                DISPLAY.FOV,
+                DISPLAY.VIEW_DISTANCE,
+            )
         cls.RAY_CASTER.clear_lights()
 
         DISPLAY.display_scaled(cls.SURFACE)

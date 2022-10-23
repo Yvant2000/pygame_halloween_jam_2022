@@ -1,9 +1,11 @@
 
 from pygame import Surface
+from pygame.mixer import Sound
 
 from scripts.display import DISPLAY
 from scripts.input_handler import INPUT
-from scripts.utils import load_image, GameState
+from scripts.visuals import VISUALS
+from scripts.utils import load_image, GameState, join_path
 
 
 class Button:
@@ -21,14 +23,19 @@ class MAIN_MENU:
     background_image: Surface = load_image("data", "main_menu", "background.png")
     selected_button: int = 0
 
+    pressing_up: bool = False
+    pressing_down: bool = False
+
+    main_game_beaten: bool = False
+    endless_mode_score: int = 0
+
     BUTTONS: list[Button] = [
         Button("play", 243, 116),
-        Button("endless", 243, 185),
+        Button("endless", 243, 185) if main_game_beaten else Button("endless_blocked", 243, 185),
         Button("quit", 243, 260)
     ]
 
-    pressing_up: bool = False
-    pressing_down: bool = False
+    white_noise: Sound = Sound(join_path("data", "sounds", "sfx", "white_noise_hit.ogg"))
 
     @classmethod
     def update(cls) -> None:
@@ -48,6 +55,11 @@ class MAIN_MENU:
                     GAME_LOGIC.reset()
                     GAME.state = GameState.PLAYING
                 case 1:
+                    if not cls.main_game_beaten:
+                        if cls.white_noise.get_num_channels() < 1:
+                            VISUALS.fried = 1.0
+                            cls.white_noise.play()
+                        return
                     raise NotImplementedError  # TODO: Implement endless mode
                 case 2:  # QUIT BUTTON
                     GAME.state = GameState.QUIT
@@ -65,3 +77,14 @@ class MAIN_MENU:
                     cls.pressing_down = True
             else:
                 cls.pressing_down = False
+
+        VISUALS.display()
+
+
+try:
+    with open("save.txt", "r") as file:
+        content = file.read().split("\n")
+        MAIN_MENU.main_game_beaten = content[0] == "True"
+        MAIN_MENU.endless_mode_score = int(content[1])
+except FileNotFoundError:
+    pass
