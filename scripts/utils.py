@@ -20,6 +20,8 @@ MAP_COLLISIONS: tuple[Rect, ...] = (
 
     Rect(-7, 15, 16, 20),  # bed
     Rect(13, 30, 6, 5),  # nightstand
+
+    Rect(-25, 23, 20, 10),  # closet
 )
 
 

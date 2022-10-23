@@ -77,12 +77,12 @@ def load_static_surfaces(caster: RayCaster) -> None:
         -1.6, 0.0, -3.2)
 
     caster.add_surface(
-        load_image("data", "images", "props", "wardrobe_side.png"),
+        load_image("data", "images", "props", "wardrobe_left.png"),
         0.0, 2.0, -3.2,
         0.0, 0.0, -3.5)
 
     caster.add_surface(
-        load_image("data", "images", "props", "wardrobe_side.png"),
+        load_image("data", "images", "props", "wardrobe_right.png"),
         -1.6, 2.0, -3.2,
         -1.6, 0.0, -3.5)
 
@@ -114,4 +114,28 @@ def load_static_surfaces(caster: RayCaster) -> None:
         0.9, 0.5, 3.5,
         1.5, 0.5, 3.0,
         0.9, 0.5, 3.0)
+
+    # CLOSET
+
+    caster.add_surface(
+        load_image("data", "images", "props", "closet_front.png"),
+        -2.0, 1.1, 2.2,
+        -1.0, 0.0, 2.5)
+
+    caster.add_surface(
+        load_image("data", "images", "props", "closet_side.png"),
+        -2.0, 1.1, 2.2,
+        -2.3, 0.0, 3.2)
+
+    caster.add_surface(
+        load_image("data", "images", "props", "closet_side.png"),
+        -1.0, 1.1, 2.5,
+        -1.3, 0.0, 3.5)
+
+    caster.add_surface(
+        load_image("data", "images", "props", "closet_top.png"),
+        -2.3, 1.1, 2.2,
+        -1.0, 1.1, 3.5,
+        -1.0, 1.1, 2.2,
+    )
 

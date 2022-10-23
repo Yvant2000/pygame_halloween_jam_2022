@@ -7,7 +7,7 @@ from scripts.text import TEXT
 from scripts.input_handler import INPUT
 from scripts.game_over import GAME_OVER_SCREEN
 from scripts.surface_loader import load_static_surfaces
-from scripts.interactions import Interaction, Test_Interaction, BedsideLamp, Bed, FlashLight, Wardrobe
+from scripts.interactions import Interaction, Test_Interaction, BedsideLamp, Bed, FlashLight, Wardrobe, Amogos
 from scripts.monsters import Monster, Hangman
 from scripts.visuals import hand_visual, VISUALS, wardrobe_visual
 from scripts.utils import GameState
@@ -54,7 +54,8 @@ class GAME_LOGIC:
             Test_Interaction((0, 0, 0)),
             BedsideLamp((1.3, 0.5, 3.3)),
             Bed((0, 0.5, 3)),
-            Wardrobe((0, 1, -3.21), (-0.4, 1, -3.5))
+            Wardrobe((0, 1, -3.21), (-0.4, 1, -3.5)),
+            Amogos((-1.5, 1.1, 2.9)),
         ]
 
         cls.monster_list = {

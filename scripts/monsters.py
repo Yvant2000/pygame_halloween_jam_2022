@@ -43,9 +43,9 @@ class Hangman(Monster):
         self.timer = 30.
 
         self.rope_sound = Sound(join_path("data", "sounds", "sfx", "rope.ogg"))
-        self.channel: Channel | None = None
+        self.channel: Channel = Channel(2)
         self.danger_sound = Sound(join_path("data", "sounds", "sfx", "hangman_danger.ogg"))
-        self.danger_channel: Channel | None = None
+        self.danger_channel: Channel = Channel(3)
 
     def update(self):
         """Update the monster each frame."""

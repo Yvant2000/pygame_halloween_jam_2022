@@ -1,4 +1,6 @@
 from pygame import event as pg_event, QUIT
+from pygame.mixer import set_reserved as set_reserved_channels, set_num_channels
+
 
 from scripts.display import DISPLAY
 from scripts.input_handler import INPUT
@@ -8,6 +10,9 @@ from scripts.game_logic import GAME_LOGIC
 from scripts.game_over import GAME_OVER_SCREEN
 from scripts.utils import GameState
 from scripts.visuals import VISUALS
+
+set_num_channels(16)
+set_reserved_channels(8)
 
 
 class GAME:

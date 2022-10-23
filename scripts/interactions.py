@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from pygame import Surface
-from pygame.mixer import find_channel, Channel, Sound
+from pygame.mixer import Channel, Sound
 
 from scripts.text import TEXT
 from scripts.utils import distance, join_path, set_stereo_volume, load_image, add_surface_toward_player_2d
@@ -33,7 +33,7 @@ class Interaction(ABC):
 class Test_Interaction(Interaction):
     def __init__(self, pos):
         self.pos = pos
-        self.channel: Channel = find_channel(True)
+        self.channel: Channel = Channel(0)
         self.sound: Sound = Sound(join_path("data", "sounds", "sfx", "test.ogg"))
 
     def can_interact(self, player) -> bool:
@@ -59,7 +59,6 @@ class Test_Interaction(Interaction):
         )
 
         set_stereo_volume(player, self.pos, self.channel)
-
         if self.channel.get_busy():
             return
         # self.channel.play(self.sound)
@@ -166,13 +165,14 @@ class Wardrobe(Interaction):
         self.x: float = 0.
 
         self.door_image: Surface = load_image("data", "images", "props", "wardrobe_left_door.png")
+        self.sound: Sound = Sound(join_path("data", "sounds", "sfx", "wardrobe.ogg"))
 
     def can_interact(self, player) -> bool:
         if player.is_looking_at((self.door_pos[0] - self.x - 0.4, *(self.door_pos[1:])), 0.5) and distance(player.pos, self.door_pos) < 2.0:
             TEXT.replace("Close the wardrobe" if self.opening else "Open the wardrobe", duration=0.0, fade_out=0.3, color=(100, 100, 100))
             return True
 
-        if self.opening and player.is_looking_at(self.enter_pos, 0.8) and distance(player.pos, self.door_pos) < 1.8:
+        if self.opening and player.is_looking_at(self.enter_pos, 0.8) and distance(player.pos, self.door_pos) < 1.2:
             TEXT.replace("Enter the wardrobe", duration=0.0, fade_out=0.3, color=(100, 100, 100))
             return True
         return False
@@ -180,15 +180,16 @@ class Wardrobe(Interaction):
     def interact(self, player):
         if player.is_looking_at((self.door_pos[0] - self.x - 0.4, *(self.door_pos[1:])), 0.5) and distance(player.pos, self.door_pos) < 2.0:
             self.opening = not self.opening
-            # TODO: add sound
+            self.sound.stop()
+            self.sound.play()
         else:
             player.in_wardrobe = True
 
     def update(self, player):
         if self.opening:
-            self.x = min(0.8, self.x + 0.8 * DISPLAY.delta_time)
+            self.x = min(0.8, self.x + 1.2 * DISPLAY.delta_time)
         else:
-            self.x = max(0., self.x - 0.8 * DISPLAY.delta_time)
+            self.x = max(0., self.x - 1.2 * DISPLAY.delta_time)
 
         from scripts.game_logic import GAME_LOGIC
         GAME_LOGIC.RAY_CASTER.add_surface(
@@ -196,3 +197,59 @@ class Wardrobe(Interaction):
             self.door_pos[0] - self.x, 2.0, self.door_pos[2],
             self.door_pos[0] - self.x - 0.8, 0.0, self.door_pos[2],
             rm=True)
+
+
+class Amogos(Interaction):
+    def __init__(self, pos):
+        self.pos = pos
+        self.image: Surface = load_image("data", "images", "props", "babyphone.png")
+        self.image_alert: Surface = load_image("data", "images", "props", "babyphone_alert.png")
+
+        self.alert: bool = False
+        self.channel: Channel = Channel(1)
+        self.default_sound: Sound = Sound(join_path("data", "sounds", "sfx", "white_noise.ogg"))
+
+    def can_interact(self, player) -> bool:
+        if self.channel.get_busy():
+            return False
+
+        if player.is_looking_at(self.pos, 0.4) and distance(player.pos, self.pos) < 2.0:
+            TEXT.replace("Turn of the baby-phone", duration=0.0, fade_out=0.3, color=(100, 100, 100))
+            return True
+        return False
+
+    def interact(self, player):
+        if not self.alert:
+            self.channel.play(self.default_sound, loops=1)
+
+        # TODO
+
+    def update(self, player):
+        from scripts.game_logic import GAME_LOGIC
+
+        if self.channel.get_busy():
+            set_stereo_volume(GAME_LOGIC.PLAYER, self.pos, self.channel)
+
+        if self.alert:
+            # {"x", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
+            GAME_LOGIC.RAY_CASTER.add_light(
+                self.pos,
+                0.8,
+                0.8, 0.2, 0.3,
+            )
+            return add_surface_toward_player_2d(
+                GAME_LOGIC.RAY_CASTER,
+                player,
+                self.image_alert,
+                self.pos,
+                0.5,
+                0.5,
+            )
+        add_surface_toward_player_2d(
+            GAME_LOGIC.RAY_CASTER,
+            player,
+            self.image,
+            self.pos,
+            0.5,
+            0.5,
+        )
