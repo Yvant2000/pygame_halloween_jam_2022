@@ -12,6 +12,7 @@ from nostalgiaefilters import vignette, fish, distortion
 
 
 hand_visual: Surface = load_image("data", "images", "visuals", "hand.png")
+wardrobe_visual: Surface = load_image("data", "images", "visuals", "wardrobe.png")
 
 
 class VISUALS:

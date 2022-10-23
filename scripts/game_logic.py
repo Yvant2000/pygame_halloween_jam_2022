@@ -1,4 +1,5 @@
 from pygame import Surface
+from pygame.transform import scale
 
 from scripts.player_controler import Player
 from scripts.display import DISPLAY
@@ -6,9 +7,9 @@ from scripts.text import TEXT
 from scripts.input_handler import INPUT
 from scripts.game_over import GAME_OVER_SCREEN
 from scripts.surface_loader import load_static_surfaces
-from scripts.interactions import Interaction, Test_Interaction, BedsideLamp, Bed, FlashLight
+from scripts.interactions import Interaction, Test_Interaction, BedsideLamp, Bed, FlashLight, Wardrobe
 from scripts.monsters import Monster, Hangman
-from scripts.visuals import hand_visual, VISUALS
+from scripts.visuals import hand_visual, VISUALS, wardrobe_visual
 from scripts.utils import GameState
 
 
@@ -51,8 +52,9 @@ class GAME_LOGIC:
         cls.interaction_list = [
             FlashLight((1, 0, -3)),
             Test_Interaction((0, 0, 0)),
-            BedsideLamp((2, 0, 3)),
+            BedsideLamp((1.3, 0.5, 3.3)),
             Bed((0, 0.5, 3)),
+            Wardrobe((0, 1, -3.21), (-0.4, 1, -3.5))
         ]
 
         cls.monster_list = {
@@ -69,7 +71,7 @@ class GAME_LOGIC:
         cls.PLAYER.update()
         cls.display()
 
-        if not cls.PLAYER.in_bed:
+        if not (cls.PLAYER.in_bed or cls.PLAYER.in_wardrobe):
             for interaction in cls.interaction_list:
                 if interaction.can_interact(cls.PLAYER):
                     DISPLAY.screen.blit(
@@ -138,6 +140,28 @@ class GAME_LOGIC:
                 DISPLAY.FOV,
                 DISPLAY.VIEW_DISTANCE,
             )
+        elif cls.PLAYER.in_wardrobe:
+            if cls.PLAYER.use_flashlight:
+                cls.RAY_CASTER.add_light(
+                    -0.4, cls.PLAYER.height, -3.3,
+                    DISPLAY.VIEW_DISTANCE,
+                    0.5, 0.6, 0.7,
+                    direction_x=-0.4,
+                    direction_y=cls.PLAYER.height,
+                    direction_z=5.0,
+                )
+
+            cls.RAY_CASTER.raycasting(
+                cls.SURFACE,
+                -0.4, cls.PLAYER.height, -3.4,
+                0,
+                90,
+                DISPLAY.FOV,
+                DISPLAY.VIEW_DISTANCE,
+            )
+
+            cls.SURFACE.blit(scale(wardrobe_visual, cls.SURFACE.get_size()), (0, 0))
+
         else:
             if cls.PLAYER.use_flashlight:
                 cls.RAY_CASTER.add_light(

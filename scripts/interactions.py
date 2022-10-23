@@ -6,6 +6,7 @@ from pygame.mixer import find_channel, Channel, Sound
 from scripts.text import TEXT
 from scripts.utils import distance, join_path, set_stereo_volume, load_image, add_surface_toward_player_2d
 from scripts.visuals import VISUALS
+from scripts.display import DISPLAY
 
 
 class Interaction(ABC):
@@ -154,3 +155,44 @@ class FlashLight(Interaction):
             0.5,
             0.5,
         )
+
+
+class Wardrobe(Interaction):
+    def __init__(self, door_pos, enter_pos):
+        self.opening: bool = False
+        self.enter_pos = enter_pos
+        self.door_pos = door_pos
+
+        self.x: float = 0.
+
+        self.door_image: Surface = load_image("data", "images", "props", "wardrobe_left_door.png")
+
+    def can_interact(self, player) -> bool:
+        if player.is_looking_at((self.door_pos[0] - self.x - 0.4, *(self.door_pos[1:])), 0.5) and distance(player.pos, self.door_pos) < 2.0:
+            TEXT.replace("Close the wardrobe" if self.opening else "Open the wardrobe", duration=0.0, fade_out=0.3, color=(100, 100, 100))
+            return True
+
+        if self.opening and player.is_looking_at(self.enter_pos, 0.8) and distance(player.pos, self.door_pos) < 1.8:
+            TEXT.replace("Enter the wardrobe", duration=0.0, fade_out=0.3, color=(100, 100, 100))
+            return True
+        return False
+
+    def interact(self, player):
+        if player.is_looking_at((self.door_pos[0] - self.x - 0.4, *(self.door_pos[1:])), 0.5) and distance(player.pos, self.door_pos) < 2.0:
+            self.opening = not self.opening
+            # TODO: add sound
+        else:
+            player.in_wardrobe = True
+
+    def update(self, player):
+        if self.opening:
+            self.x = min(0.8, self.x + 0.8 * DISPLAY.delta_time)
+        else:
+            self.x = max(0., self.x - 0.8 * DISPLAY.delta_time)
+
+        from scripts.game_logic import GAME_LOGIC
+        GAME_LOGIC.RAY_CASTER.add_surface(
+            self.door_image,
+            self.door_pos[0] - self.x, 2.0, self.door_pos[2],
+            self.door_pos[0] - self.x - 0.8, 0.0, self.door_pos[2],
+            rm=True)

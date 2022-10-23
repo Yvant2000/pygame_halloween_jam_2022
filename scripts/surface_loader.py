@@ -57,17 +57,61 @@ def load_static_surfaces(caster: RayCaster) -> None:
     )
 
     caster.add_surface(
-        load_image("data", "images", "props", "side_bed.png"),
+        load_image("data", "images", "props", "bed_left.png"),
         -0.8, 0.4, 3.5,
         -0.8, 0, 1.5)
     caster.add_surface(
-        load_image("data", "images", "props", "side_bed.png"),
-        0.8, 0.4, 3.5,
-        0.8, 0, 1.5)
+        load_image("data", "images", "props", "bed_right.png"),
+        0.8, 0, 3.5,
+        0.8, 0.4, 1.5)
 
     caster.add_surface(
         load_image("data", "images", "props", "front_bed.png"),
         -0.8, 0.4, 1.52,
         0.8, 0.0, 1.52)
 
+    # WARDROBE
+    caster.add_surface(
+        load_image("data", "images", "props", "wardrobe_right_door.png"),
+        -0.8, 2.0, -3.2,
+        -1.6, 0.0, -3.2)
+
+    caster.add_surface(
+        load_image("data", "images", "props", "wardrobe_side.png"),
+        0.0, 2.0, -3.2,
+        0.0, 0.0, -3.5)
+
+    caster.add_surface(
+        load_image("data", "images", "props", "wardrobe_side.png"),
+        -1.6, 2.0, -3.2,
+        -1.6, 0.0, -3.5)
+
+    caster.add_surface(
+        load_image("data", "images", "props", "wardrobe_top.png"),
+        -1.6, 1.9, -3.5,
+        0.0, 1.91, -3.2,
+        -1.6, 1.91, -3.2)
+
+    #NIGHTSTAND
+
+    caster.add_surface(
+        load_image("data", "images", "props", "nightstand_front.png"),
+        0.9, 0.5, 3.01,
+        1.5, 0.0, 3.01)
+
+    caster.add_surface(
+        load_image("data", "images", "props", "nightstand_side.png"),
+        0.9, 0.5, 3.0,
+        0.9, 0.0, 3.5)
+
+    caster.add_surface(
+        load_image("data", "images", "props", "nightstand_side.png"),
+        1.5, 0.5, 3.0,
+        1.5, 0.0, 3.5)
+
+    caster.add_surface(
+        load_image("data", "images", "props", "nightstand_top.png"),
+        0.9, 0.5, 3.5,
+        1.5, 0.5, 3.0,
+        0.9, 0.5, 3.0)
 

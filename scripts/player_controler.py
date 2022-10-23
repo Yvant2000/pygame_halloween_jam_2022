@@ -31,12 +31,20 @@ class Player:
         self.bedside_light: bool = False
 
         self.in_bed: bool = False
+        self.in_wardrobe: bool = False
 
         self.look_direction: tuple[float, float, float] = (0, 0, 0)
+
+        self.cancel: tuple[float, float] = (0, 0)
 
     @property
     def pos(self) -> tuple[float, float, float]:
         return self.x, self.y + self.height, self.z
+
+    def collision(self) -> bool:
+        if Rect(int(self.x * 10), int(self.z * 10), 5, 5).collidelist(MAP_COLLISIONS) != -1:
+            self.x, self.z = self.cancel
+        self.cancel = self.x, self.z
 
     def update(self):
 
@@ -44,9 +52,9 @@ class Player:
             if INPUT.flash_light():
                 self.use_flashlight = not self.use_flashlight
 
-        if self.in_bed:
+        if self.in_bed or self.in_wardrobe:
             if INPUT.jump() or INPUT.interact():
-                self.in_bed = False
+                self.in_bed = self.in_wardrobe = False
             return
 
         self.angle_y -= INPUT.rel[0] * DISPLAY.delta_time
@@ -54,26 +62,33 @@ class Player:
 
         speed = self.run_speed if INPUT.sprint() else self.walk_speed
 
-        cancel = self.x, self.z
+        self.cancel = self.x, self.z
 
         if INPUT.up():
             self.x += speed * cos(radians(self.angle_y)) * DISPLAY.delta_time
+            self.collision()
             self.z += speed * sin(radians(self.angle_y)) * DISPLAY.delta_time
+            self.collision()
 
         elif INPUT.down():
             self.x -= speed * cos(radians(self.angle_y)) * DISPLAY.delta_time
+            self.collision()
             self.z -= speed * sin(radians(self.angle_y)) * DISPLAY.delta_time
+            self.collision()
 
         if INPUT.left():
             self.x += speed * cos(radians(self.angle_y + 90)) * DISPLAY.delta_time
+            self.collision()
             self.z += speed * sin(radians(self.angle_y + 90)) * DISPLAY.delta_time
+            self.collision()
 
         elif INPUT.right():
             self.x -= speed * cos(radians(self.angle_y + 90)) * DISPLAY.delta_time
+            self.collision()
             self.z -= speed * sin(radians(self.angle_y + 90)) * DISPLAY.delta_time
+            self.collision()
 
-        if Rect(int(self.x * 10), int(self.z * 10), 5, 5).collidelist(MAP_COLLISIONS) != -1:
-            self.x, self.z = cancel
+        # self.collision()
 
         if INPUT.jump() and self.y <= 0:
             self._jump_speed = 0.6
