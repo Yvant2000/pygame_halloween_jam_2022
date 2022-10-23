@@ -32,7 +32,7 @@ class VISUALS:
 
     @classmethod
     def reset(cls):
-        cls.vignette = 0.
+        cls.vignette = 5.
         cls.min_vignette = 0.
 
         cls.shake = 0.

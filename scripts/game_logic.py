@@ -4,10 +4,13 @@ from scripts.player_controler import Player
 from scripts.display import DISPLAY
 from scripts.text import TEXT
 from scripts.input_handler import INPUT
+from scripts.game_over import GAME_OVER_SCREEN
 from scripts.surface_loader import load_static_surfaces
 from scripts.interactions import Interaction, Test_Interaction
 from scripts.monsters import Monster, Hangman
 from scripts.visuals import hand_visual, VISUALS
+from scripts.utils import GameState
+
 
 from nostalgiaeraycasting import RayCaster
 
@@ -26,9 +29,14 @@ class GAME_LOGIC:
     interaction_list: list[Interaction]
     monster_list: dict[str, Monster]
 
+    ENDLESS: bool
+
     @classmethod
-    def reset(cls):
+    def reset(cls, endless: bool = False):
+        cls.ENDLESS = endless
+
         VISUALS.reset()
+
         cls.PLAYER = Player()
         cls.RAY_CASTER = RayCaster()
         cls.SURFACE = Surface((128, 72))  # 16:9
@@ -46,8 +54,9 @@ class GAME_LOGIC:
         cls.monster_list = {
             "Hangman": Hangman(),
         }
+        # cls.monster_list["Hangman"].aggressiveness = 20
 
-        TEXT.add("Inspect the room.")
+        TEXT.replace("Inspect the room.")
 
     @classmethod
     def update(cls) -> None:
@@ -120,3 +129,9 @@ class GAME_LOGIC:
         VISUALS.display()
 
         TEXT.update()
+
+    @classmethod
+    def game_over(cls):
+        from scripts.game import GAME
+        GAME.state = GameState.GAME_OVER
+        GAME_OVER_SCREEN.reset()

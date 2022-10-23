@@ -6,6 +6,8 @@ from pygame.mixer import Sound, Channel, find_channel
 
 from scripts.visuals import VISUALS
 from scripts.display import DISPLAY
+from scripts.text import TEXT
+from scripts.game_over import GAME_OVER_SCREEN
 from scripts.utils import load_image, add_surface_toward_player_2d, join_path, set_stereo_volume
 
 
@@ -36,9 +38,9 @@ class Hangman(Monster):
         self.x = 0
         self.z = 0
         self.width = 1
-        self.height = 2.
+        self.height = 2.5
         self.state = 0
-        self.timer = 0.
+        self.timer = 30.
 
         self.rope_sound = Sound(join_path("data", "sounds", "sfx", "rope.ogg"))
         self.channel: Channel | None = None
@@ -56,18 +58,25 @@ class Hangman(Monster):
             set_stereo_volume(GAME_LOGIC.PLAYER, (self.x, 1, self.z), self.channel)
             self.danger_channel.set_volume(self.madness)
             if GAME_LOGIC.PLAYER.is_looking_at((self.x, 1.4, self.z), 1.3):
+                if len(TEXT.text_list) < 2:
+                    TEXT.add(
+                        " " * randint(0, 5) + "LOOK AT ME" + " " * randint(0, 5),
+                        duration=0.08, fade_out=0., color=(50, 5, 5), font="HelpMe",
+                        y=randint(50, DISPLAY.screen_size[1] - 50), size=int(32 * (1 + self.madness))
+                    )
+
                 self.madness += DISPLAY.delta_time * (1 + self.aggressiveness / 5) * 0.2
-                VISUALS.fish_eye += 1.2 * DISPLAY.delta_time
+                VISUALS.fish_eye += 2.0 * DISPLAY.delta_time
                 VISUALS.vignette += 1.7 * DISPLAY.delta_time
                 VISUALS.distortion += 1.2 * DISPLAY.delta_time
                 VISUALS.shake += 1.2 * DISPLAY.delta_time
-                VISUALS.fried += 1.2 * DISPLAY.delta_time
+                # VISUALS.fried += 1.2 * DISPLAY.delta_time
             else:
                 self.madness -= DISPLAY.delta_time * 0.2
 
-            print(self.madness)
-
-            # TODO: Add Game Over screen
+            if self.madness > 1.0:
+                GAME_OVER_SCREEN.reason = "Don't look at the hangman. Listen carefully for the rope."
+                GAME_LOGIC.game_over()
 
         if GAME_LOGIC.time_stopped:
             return
@@ -80,6 +89,7 @@ class Hangman(Monster):
                 self.channel = find_channel(True)
                 self.channel.play(self.rope_sound, loops=-1)
                 self.danger_channel = find_channel(True)
+                self.danger_channel.set_volume(0)
                 self.danger_channel.play(self.danger_sound, loops=-1)
                 self.x = randint(-1, 2)
                 self.z = randint(-2, 3)
@@ -96,8 +106,7 @@ class Hangman(Monster):
                 GAME_LOGIC.RAY_CASTER,
                 GAME_LOGIC.PLAYER,
                 self.image,
-                (self.x, 1, self.z),
+                (self.x, 0.5, self.z),
                 self.width,
                 self.height,
             )
-

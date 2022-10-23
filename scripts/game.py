@@ -5,6 +5,7 @@ from scripts.input_handler import INPUT
 from scripts.splash_screen import SPLASH_SCREEN
 from scripts.main_menu import MAIN_MENU
 from scripts.game_logic import GAME_LOGIC
+from scripts.game_over import GAME_OVER_SCREEN
 from scripts.utils import GameState
 
 
@@ -19,7 +20,7 @@ class GAME:
 
     @classmethod
     def main(cls):
-        while cls.state != GameState.QUIT:
+        while True:
             cls.events_handler()
             INPUT.update()
 
@@ -33,5 +34,12 @@ class GAME:
 
                 case GameState.PLAYING:
                     GAME_LOGIC.update()
+
+                case GameState.GAME_OVER:
+                    if GAME_OVER_SCREEN.update():
+                        cls.state = GameState.MAIN_MENU
+
+                case GameState.QUIT:
+                    break
 
             DISPLAY.update()

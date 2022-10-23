@@ -47,6 +47,7 @@ class TEXT:
 
     @classmethod
     def update(cls):
+
         if not cls.text_list:
             return
 
