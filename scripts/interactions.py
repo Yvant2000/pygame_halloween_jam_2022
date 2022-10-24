@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
 
 from random import choice as random_choice
+from math import sin, radians, cos
 
 from pygame import Surface
 from pygame.mixer import Channel, Sound
 
+from scripts.game_logic import GAME_LOGIC
 from scripts.text import TEXT
 from scripts.utils import distance, join_path, set_stereo_volume, load_image, add_surface_toward_player_2d
 from scripts.visuals import VISUALS
@@ -56,8 +58,6 @@ class Test_Interaction(Interaction):
         VISUALS.fried = 1.0
 
     def update(self, player):
-        from scripts.game_logic import GAME_LOGIC
-
         GAME_LOGIC.RAY_CASTER.add_light(
             *self.pos, 1.,
             1., 0, 0,
@@ -89,8 +89,6 @@ class BedsideLamp(Interaction):
         self.click_sound.play()
 
     def update(self, player):
-        from scripts.game_logic import GAME_LOGIC
-
         if self.light:
             # {"z", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
             GAME_LOGIC.RAY_CASTER.add_light(
@@ -146,7 +144,6 @@ class FlashLight(Interaction):
         return False
 
     def interact(self, player):
-        from scripts.game_logic import GAME_LOGIC
         player.has_flashlight = True
         player.use_flashlight = True
         pickup_sound.play()
@@ -154,7 +151,6 @@ class FlashLight(Interaction):
         GAME_LOGIC.interaction_list.remove(self)
 
     def update(self, player):
-        from scripts.game_logic import GAME_LOGIC
         add_surface_toward_player_2d(
             GAME_LOGIC.RAY_CASTER,
             player,
@@ -200,7 +196,6 @@ class Wardrobe(Interaction):
         else:
             self.x = max(0., self.x - 1.2 * DISPLAY.delta_time)
 
-        from scripts.game_logic import GAME_LOGIC
         GAME_LOGIC.RAY_CASTER.add_surface(
             self.door_image,
             self.door_pos[0] - self.x, 2.0, self.door_pos[2],
@@ -235,8 +230,6 @@ class BabyPhone(Interaction):
         # TODO
 
     def update(self, player):
-        from scripts.game_logic import GAME_LOGIC
-
         if self.channel.get_busy():
             set_stereo_volume(GAME_LOGIC.PLAYER, self.pos, self.channel)
             return add_surface_toward_player_2d(
@@ -293,13 +286,11 @@ class TeddyBear(Interaction):
         return False
 
     def interact(self, player):
-        from scripts.game_logic import GAME_LOGIC
         GAME_LOGIC.interaction_list.remove(self)
         pickup_sound.play()
         player.has_teddy_bear = True
 
     def update(self, player):
-        from scripts.game_logic import GAME_LOGIC
         add_surface_toward_player_2d(
             GAME_LOGIC.RAY_CASTER,
             player,
@@ -328,10 +319,41 @@ class MimicGift(Interaction):
         return False
 
     def interact(self, player):
-        from scripts.game_logic import GAME_LOGIC
         player.has_teddy_bear = False
         GAME_LOGIC.monster_list['Mimic'].calm()  # type: ignore
 
     def update(self, player):
         ...
+
+
+class Door(Interaction):
+    def __init__(self, pos):
+        self.image: Surface = load_image("data", "images", "props", "door.png")
+        self.pos = pos
+        self.opening: bool = False
+        self.angle: float = 0
+
+    def can_interact(self, player) -> bool:
+        if player.is_looking_at((self.pos[0] - sin(radians(self.angle)) * 0.4, self.pos[1], self.pos[2] - cos(radians(self.angle)) * 0.4), 0.4) and distance(player.pos, self.pos) < 2.0:
+            TEXT.replace("Close the door" if self.opening else "Open the door", duration=0.0, fade_out=0.3, color=(100, 100, 100))
+            return True
+        return False
+
+    def interact(self, player):
+        self.opening = not self.opening
+
+    def update(self, player):
+
+        if self.opening:
+            self.angle = min(90., self.angle + DISPLAY.delta_time * 110)
+        else:
+            self.angle = max(0., self.angle - DISPLAY.delta_time * 110)
+
+        GAME_LOGIC.RAY_CASTER.add_surface(
+            self.image,
+            self.pos[0], 0.0, self.pos[2],
+            self.pos[0] - sin(radians(self.angle)) * 0.8, 2.0, self.pos[2] - cos(radians(self.angle)) * 0.8,
+            rm=True
+        )
+
 

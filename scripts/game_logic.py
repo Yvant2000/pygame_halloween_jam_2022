@@ -7,7 +7,6 @@ from scripts.text import TEXT
 from scripts.input_handler import INPUT
 from scripts.game_over import GAME_OVER_SCREEN
 from scripts.surface_loader import load_static_surfaces
-from scripts.interactions import Interaction, BedsideLamp, Bed, FlashLight, Wardrobe, BabyPhone, MimicGift
 from scripts.visuals import hand_visual, VISUALS, wardrobe_visual
 from scripts.utils import GameState
 
@@ -26,14 +25,15 @@ class GAME_LOGIC:
     remaining_time: float
     time_stopped: bool
 
-    interaction_list: list[Interaction]
+    interaction_list: list
     monster_list: dict
 
     ENDLESS: bool
 
     @classmethod
     def reset(cls, endless: bool = False):
-        from scripts.monsters import Hangman, Mimic, Crawler
+        from scripts.monsters import Hangman, Mimic, Crawler, Guest
+        from scripts.interactions import BedsideLamp, Bed, FlashLight, Wardrobe, BabyPhone, MimicGift, Door
 
         cls.ENDLESS = endless
 
@@ -57,12 +57,14 @@ class GAME_LOGIC:
             Wardrobe((0, 1, -3.21), (-0.4, 1, -3.5)),
             BabyPhone((-1.5, 1.1, 2.7)),
             MimicGift((-2.3, 0.4, -0.2)),
+            Door((2.499, 1.0, -0.6))
         ]
 
         cls.monster_list = {
             "Hangman": Hangman(),
             "Mimic": Mimic(),
             "Crawler": Crawler(),
+            "Guest": Guest(),
         }
         # cls.monster_list["Hangman"].aggressiveness = 20
         # cls.monster_list["Mimic"].aggressiveness = 20

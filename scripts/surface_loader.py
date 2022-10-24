@@ -44,6 +44,36 @@ def load_static_surfaces(caster: RayCaster) -> None:
         2.55, 3.01, -3.55,
     )
 
+    # CORRIDOR
+
+    from scripts.utils import repeat_texture
+
+    caster.add_surface(
+        repeat_texture(load_image("data", "images", "textures", "wall_texture.png"), 8, 3),
+        2.501, 2.3, -0.4,
+        10.5, 0., -0.4
+    )
+
+    caster.add_surface(
+        repeat_texture(load_image("data", "images", "textures", "wall_texture.png"), 8, 3),
+        10.5, 2.3, -1.6,
+        2.501, 0., -1.6
+    )
+
+    caster.add_surface(
+        repeat_texture(load_image("data", "images", "textures", "ground_texture.png"), 2, 8),
+        10.5, -0.01, -0.39,
+        2.5, -0.01, -1.61,
+        2.5, -0.01, -0.39,
+    )
+
+    caster.add_surface(
+        repeat_texture(load_image("data", "images", "textures", "ceiling_texture.png"), 2, 8),
+        2.51, 2.3, -0.39,
+        10.5, 2.3, -1.61,
+        10.5, 2.3, -0.39,
+    )
+
     # BED
     caster.add_surface(
         load_image("data", "images", "props", "top_bed.png"),
@@ -96,12 +126,12 @@ def load_static_surfaces(caster: RayCaster) -> None:
         1.5, 0.0, 3.01)
 
     caster.add_surface(
-        load_image("data", "images", "props", "nightstand_side.png"),
-        0.9, 0.5, 3.0,
-        0.9, 0.0, 3.5)
+        load_image("data", "images", "props", "nightstand_left.png"),
+        0.9, 0.5, 3.5,
+        0.9, 0.0, 3.0)
 
     caster.add_surface(
-        load_image("data", "images", "props", "nightstand_side.png"),
+        load_image("data", "images", "props", "nightstand_right.png"),
         1.5, 0.5, 3.0,
         1.5, 0.0, 3.5)
 

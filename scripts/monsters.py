@@ -370,7 +370,13 @@ class Crawler(Monster):
         if GAME_LOGIC.time_stopped:
             return
 
-        self.timer -= DISPLAY.delta_time * (1 + self.aggressiveness / 10) * randint(1, 3) / 3
+        self.timer -= (
+                DISPLAY.delta_time
+                * (1 + self.aggressiveness / 10)
+                * randint(1, 3) / 3
+                * (0.5 * (GAME_LOGIC.PLAYER.use_flashlight + GAME_LOGIC.PLAYER.bedside_light * 2))
+        )
+
         if self.timer <= 0:
             self.state += 1
             match self.state:
@@ -408,3 +414,33 @@ class Crawler(Monster):
                     0.7,
                     0.7,
                 )
+
+
+class Guest(Monster):
+    def __init__(self):
+        super().__init__()
+
+        self.x = 1.0
+        self.state = 1
+        self.aggressiveness = 20
+
+        self.eye_image: Surface = load_image("data", "images", "monsters", "guest_eye.png")
+        self.running_image: Surface = load_image("data", "images", "monsters", "guest_running.png")
+
+    def update(self):
+        pass
+
+    def draw(self):
+        if not self.aggressiveness or not self.state:
+            return
+
+        match self.state:
+            case 1:
+                GAME_LOGIC.RAY_CASTER.add_surface(
+                    self.eye_image,
+                    8.0 - self.x, 2.0, -0.2,
+                    8.0 - self.x, 0.0, -1.4,
+                    rm=True,
+                )
+
+
