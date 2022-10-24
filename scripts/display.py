@@ -17,7 +17,7 @@ class DISPLAY:
 
     CLOCK: Clock = Clock()
     FPS: int = 30
-    FOV: float = 60.
+    FOV: float = 50.
     VIEW_DISTANCE: float = 6.5
     delta_time: float = 0.  # Time since the last frame in seconds
 

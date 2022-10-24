@@ -1,15 +1,17 @@
 from abc import ABC, abstractmethod
 
 from random import randint
-from math import sin
+from math import cos, sin, atan2
 
 from pygame.mixer import Sound, Channel
+from pygame.surface import Surface
 
 from scripts.visuals import VISUALS
 from scripts.display import DISPLAY
 from scripts.text import TEXT
 from scripts.game_over import GAME_OVER_SCREEN
-from scripts.utils import load_image, add_surface_toward_player_2d, join_path, set_stereo_volume
+from scripts.utils import load_image, add_surface_toward_player_2d, join_path, set_stereo_volume, distance_2d
+from scripts.interactions import TeddyBear
 
 
 class Monster(ABC):
@@ -74,12 +76,13 @@ class Hangman(Monster):
                 VISUALS.shake += 1.2 * DISPLAY.delta_time
                 # VISUALS.fried += 1.2 * DISPLAY.delta_time
             else:
-                self.madness -= DISPLAY.delta_time * 0.2
+                self.madness = max(0., self.madness - DISPLAY.delta_time * 0.2)
 
             self.danger_channel.set_volume(self.madness)
 
             if self.madness > 1.0:
                 GAME_OVER_SCREEN.reason = "Don't look at the hangman. Listen carefully for the rope."
+                GAME_OVER_SCREEN.killer = "hangman"
                 GAME_LOGIC.game_over()
 
         if GAME_LOGIC.time_stopped:
@@ -93,8 +96,11 @@ class Hangman(Monster):
                 self.channel.play(self.rope_sound, loops=-1)
                 self.danger_channel.set_volume(0, 0)
                 self.danger_channel.play(self.danger_sound, loops=-1)
-                self.x = randint(-1, 2)
-                self.z = randint(-2, 3)
+
+                self.x, self.z = GAME_LOGIC.PLAYER.x, GAME_LOGIC.PLAYER.z
+                while distance_2d((self.x, 0.0, self.z), GAME_LOGIC.PLAYER.pos) < 1.5:
+                    self.x = randint(-1, 2)
+                    self.z = randint(-2, 3)
             else:
                 self.channel.stop()
                 self.danger_channel.stop()
@@ -121,20 +127,128 @@ class Mimic(Monster):
     def __init__(self):
         super().__init__()
 
-        self.front_image = load_image("data", "images", "props", "chest_front.png")
-        self.side_image = load_image("data", "images", "props", "chest_side.png")
-        self.top_image = load_image("data", "images", "props", "chest_top.png")
+        self.front_image: Surface = load_image("data", "images", "props", "chest_front.png")
+        self.side_image: Surface = load_image("data", "images", "props", "chest_side.png")
+        self.top_image: Surface = load_image("data", "images", "props", "chest_top.png")
+
+        self.monster_image: Surface = load_image("data", "images", "monsters", "mimic.png")
+
+        self.timer = 15.
+
+        self.x: float = 0
+        self.z: float = 0
+
+        self.angle_y: float = 0
+
+        self.teddy_bear: TeddyBear | None = None
 
     def update(self):
         """Update the monster each frame."""
-        ...
+        from scripts.game_logic import GAME_LOGIC
+
+        if not self.aggressiveness:
+            return
+
+        if self.state > 3:
+            target = (
+                GAME_LOGIC.PLAYER.pos
+                if (not GAME_LOGIC.PLAYER.in_wardrobe or GAME_LOGIC.PLAYER.has_teddy_bear)
+                else (
+                    self.teddy_bear.pos if self.teddy_bear else (-2.2, 0.2, -0.3)
+                )
+            )
+
+            # orient the monster toward the target
+            self.angle_y = atan2(target[0] - self.x, target[2] - self.z)
+
+            # move the monster toward the target
+            self.x += sin(self.angle_y) * DISPLAY.delta_time * 2
+            self.z += cos(self.angle_y) * DISPLAY.delta_time * 2
+
+            if distance_2d((self.x, 0.0, self.z), target) < 1.0:
+                if target == GAME_LOGIC.PLAYER.pos:
+                    if GAME_LOGIC.PLAYER.in_wardrobe:
+                        GAME_OVER_SCREEN.reason = "Don't hide if you found the plushie."
+                    elif GAME_LOGIC.PLAYER.has_teddy_bear:
+                        GAME_OVER_SCREEN.reason = "You must give back George before his friends gets angry."
+                    else:
+                        GAME_OVER_SCREEN.reason = "The plushie is hidden in the room. Find it before he gets angry."
+                    GAME_OVER_SCREEN.killer = "mimic"
+                    GAME_LOGIC.game_over()
+                elif self.teddy_bear:
+                    GAME_LOGIC.interaction_list.remove(self.teddy_bear)
+                    self.teddy_bear = None
+                else:
+                    self.calm()
+
+        if GAME_LOGIC.time_stopped and self.state < 3:
+            return
+
+        self.timer -= DISPLAY.delta_time * (1 + self.aggressiveness / 10) * randint(1, 3) / 3
+        if self.timer <= 0:
+            self.state += 1
+            match self.state:
+                case 1:
+                    self.timer = 10.
+                    self.teddy_bear = TeddyBear()
+                    GAME_LOGIC.interaction_list.append(self.teddy_bear)
+                case 2:
+                    self.timer = 10.
+                case 3:
+                    self.timer = 5.
+                    GAME_LOGIC.time_stopped = True
+                case 4:
+                    self.timer = 25.
+                    self.x = -2.2
+                    self.z = -0.3
+                case _:
+                    ...
+
+    def calm(self):
+        from scripts.game_logic import GAME_LOGIC
+        if self.state >= 3:
+            GAME_LOGIC.time_stopped = False
+        self.state = 0
+        self.timer = 25.
+        self.teddy_bear = None
+        self.x = 0
+        self.z = 0
 
     def draw(self):
         """Draw the monster each frame."""
 
-        if self.state == 0:
-            self.draw_chest()
-            return
+        from scripts.game_logic import GAME_LOGIC
+
+        match self.state:
+            case 0 | 1:
+                self.draw_chest()
+
+            case 2 | 3:  # phase last 10 seconds
+                self.draw_chest()
+                temp = max(0., 1.0 - self.timer / 10) if self.state == 2 else 1.0
+                # {"x", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
+                GAME_LOGIC.RAY_CASTER.add_light(
+                    -2.2, 0.2, -0.3,
+                    2.0 * temp,
+                    1.0, 0.3, 0.0,
+                )
+                self.z = 0.02 * (int(self.timer * 100) % 2 - 0.5) * temp
+                self.x = 0.016 * (int(self.timer * 100) % 2 - 0.5) * temp
+
+            case _:
+                GAME_LOGIC.RAY_CASTER.add_light(
+                    self.x, 0.2, self.z,
+                    2.0,
+                    1.0, 0.3, 0.0,
+                )
+                add_surface_toward_player_2d(
+                    GAME_LOGIC.RAY_CASTER,
+                    GAME_LOGIC.PLAYER,
+                    self.monster_image,
+                    (self.x, 0, self.z),
+                    1.5,
+                    1.0,
+                )
 
     def draw_chest(self):
         from scripts.game_logic import GAME_LOGIC
@@ -142,42 +256,42 @@ class Mimic(Monster):
         # {"image", "A_x", "A_y", "A_z", "B_x", "B_y", "B_z","C_x", "C_y", "C_z", "rm", NULL};
         GAME_LOGIC.RAY_CASTER.add_surface(
             self.front_image,
-            -1.9, 0.41, -0.95,
-            -1.9, 0.0, 0.35,
+            -1.9 + self.x, 0.41, -0.95 + self.z,
+            -1.9 + self.x, 0.0, 0.35 + self.z,
             rm=True,
         )
         GAME_LOGIC.RAY_CASTER.add_surface(
             self.side_image,
-            -2.5, 0.6, -0.95,
-            -1.9, 0.0, -0.95,
+            -2.5 + self.x, 0.6, -0.95 + self.z,
+            -1.9 + self.x, 0.0, -0.95 + self.z,
             rm=True,
         )
         GAME_LOGIC.RAY_CASTER.add_surface(
             self.side_image,
-            -2.5, 0.6, 0.35,
-            -1.9, 0.0, 0.35,
+            -2.5 + self.x, 0.6, 0.35 + self.z,
+            -1.9 + self.x, 0.0, 0.35 + self.z,
             rm=True,
         )
         GAME_LOGIC.RAY_CASTER.add_surface(
             self.top_image,
-            -2.31, 0.6, -0.95,
-            -2.09, 0.6, 0.35,
-            -2.09, 0.6, -0.95,
+            -2.31 + self.x, 0.6, -0.95 + self.z,
+            -2.09 + self.x, 0.6, 0.35 + self.z,
+            -2.09 + self.x, 0.6, -0.95 + self.z,
             rm=True,
         )
 
         GAME_LOGIC.RAY_CASTER.add_surface(
             self.top_image,
-            -2.1, 0.6, -0.95,
-            -1.89, 0.4, 0.35,
-            -1.89, 0.4, -0.95,
+            -2.1 + self.x, 0.6, -0.95 + self.z,
+            -1.89 + self.x, 0.4, 0.35 + self.z,
+            -1.89 + self.x, 0.4, -0.95 + self.z,
             rm=True,
         )
 
         GAME_LOGIC.RAY_CASTER.add_surface(
             self.top_image,
-            -2.3, 0.6, -0.95,
-            -2.5, 0.4, 0.35,
-            -2.5, 0.4, -0.95,
+            -2.3 + self.x, 0.6, -0.95 + self.z,
+            -2.5 + self.x, 0.4, 0.35 + self.z,
+            -2.5 + self.x, 0.4, -0.95 + self.z,
             rm=True,
         )

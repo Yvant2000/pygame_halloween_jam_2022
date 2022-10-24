@@ -71,6 +71,10 @@ def distance(a: tuple[float, float, float], b: tuple[float, float, float]):
     return ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2) ** 0.5
 
 
+def distance_2d(a: tuple[float, float, float], b: tuple[float, float, float]):
+    return ((a[0] - b[0]) ** 2 + (a[2] - b[2]) ** 2) ** 0.5
+
+
 def line_point_distance(point: tuple[float, float, float],
                         line_point: tuple[float, float, float],
                         direction: tuple[float, float, float]):

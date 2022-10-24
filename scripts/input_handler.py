@@ -2,7 +2,7 @@ from typing import Sequence
 
 from pygame import key as pg_key
 from pygame import event as pg_event
-from pygame import K_RETURN, K_SPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_w, K_a, K_d, K_s, K_LSHIFT, K_LCTRL, K_e, K_f
+from pygame import K_RETURN, K_SPACE, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_w, K_a, K_d, K_s, K_LSHIFT, K_LCTRL, K_e, K_f, K_z, K_q
 from pygame import mouse as pg_mouse
 
 from scripts.display import DISPLAY
@@ -50,7 +50,7 @@ class INPUT:
 
     @classmethod
     def up(cls) -> bool:
-        return cls.keys[K_UP] or cls.keys[K_w]
+        return cls.keys[K_UP] or cls.keys[K_w] or cls.keys[K_z]
 
     @classmethod
     def down(cls) -> bool:
@@ -58,7 +58,7 @@ class INPUT:
 
     @classmethod
     def left(cls) -> bool:
-        return cls.keys[K_LEFT] or cls.keys[K_a]
+        return cls.keys[K_LEFT] or cls.keys[K_a] or cls.keys[K_q]
 
     @classmethod
     def right(cls) -> bool:

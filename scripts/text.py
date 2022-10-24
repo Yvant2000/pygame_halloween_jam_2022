@@ -8,7 +8,8 @@ from scripts.display import DISPLAY
 class TextMessage:
     def __init__(self, text, duration: float = 5., fade_out: float = 1.0,
                  font: str = "PressStart2P", color: tuple[int, int, int] = (255, 255, 255), size: int = 16,
-                 y: int = 330):
+                 y: int = 330,
+                 force: bool = False):
         self.duration: float = duration
         self.fade_out: float = fade_out
 
@@ -17,6 +18,8 @@ class TextMessage:
 
         self.x: int = DISPLAY.screen_size[0]//2 - self._surface.get_width()//2
         self.y: int = y
+
+        self.force: bool = force
 
     def display(self, surface: Surface) -> bool:
         """Display the text message on the given surface.
@@ -42,6 +45,9 @@ class TEXT:
 
     @classmethod
     def replace(cls, text: str, *args, **kwargs):
+        if cls.text_list and cls.text_list[0].force:
+            return
+
         cls.text_list.clear()
         cls.add(text, *args, **kwargs)
 

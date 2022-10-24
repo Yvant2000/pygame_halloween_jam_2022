@@ -1,7 +1,7 @@
 from nostalgiaeraycasting import RayCaster
 
 
-from scripts.utils import load_image, repeat_texture
+from scripts.utils import load_image
 
 
 def load_static_surfaces(caster: RayCaster) -> None:
@@ -38,7 +38,7 @@ def load_static_surfaces(caster: RayCaster) -> None:
     )
     # CEILING
     caster.add_surface(
-        repeat_texture(load_image("data", "images", "textures", "ceiling_texture.png"), 5, 7),
+        load_image("data", "images", "textures", "ceiling.png"),
         2.55, 3, 3.55,
         -2.55, 3.01, -3.55,
         2.55, 3.01, -3.55,

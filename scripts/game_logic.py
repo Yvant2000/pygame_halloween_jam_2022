@@ -17,7 +17,7 @@ from nostalgiaeraycasting import RayCaster
 
 
 class GAME_LOGIC:
-    HOUR_DURATION: float = 120.
+    HOUR_DURATION: float = 140.
 
     PLAYER: Player
     RAY_CASTER: RayCaster
@@ -62,10 +62,12 @@ class GAME_LOGIC:
             "Hangman": Hangman(),
             "Mimic": Mimic(),
         }
-        # cls.monster_list["Hangman"].aggressiveness = 20
+        cls.monster_list["Hangman"].aggressiveness = 20
+        # cls.monster_list["Mimic"].aggressiveness = 20
 
-        TEXT.replace("Inspect the room.", duration=2, fade_out=0)
-        TEXT.add("Interact with LEFT CLICK")
+        TEXT.replace("Inspect the room.", duration=3, fade_out=0, force=True)
+        TEXT.add("Move with WASD.", duration=3, fade_out=0, force=True)
+        TEXT.add("Interact with LEFT CLICK.", force=True)
 
     @classmethod
     def update(cls) -> None:

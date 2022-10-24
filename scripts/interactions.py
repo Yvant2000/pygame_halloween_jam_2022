@@ -74,10 +74,11 @@ class BedsideLamp(Interaction):
         self.pos: tuple[float, float, float] = pos
         self.light: bool = False
         self.click_sound: Sound = Sound(join_path("data", "sounds", "sfx", "click.ogg"))
-        self.image: Surface = load_image("data", "images", "props", "bedsidelight.png")
+        self.image_off: Surface = load_image("data", "images", "props", "bedsidelight_off.png")
+        self.image_on: Surface = load_image("data", "images", "props", "bedsidelight_on.png")
 
     def can_interact(self, player) -> bool:
-        if player.is_looking_at(self.pos) and distance(player.pos, self.pos) < 2:
+        if player.is_looking_at(self.pos, 0.4) and distance(player.pos, self.pos) < 2:
             TEXT.replace("Turn off the light" if self.light else "Turn on the light", duration=0.0, fade_out=0.3, color=(100, 100, 100))
             return True
         return False
@@ -106,7 +107,7 @@ class BedsideLamp(Interaction):
         add_surface_toward_player_2d(
             GAME_LOGIC.RAY_CASTER,
             player,
-            self.image,
+            self.image_on if self.light else self.image_off,
             self.pos,
             0.5,
             0.5,
@@ -149,7 +150,7 @@ class FlashLight(Interaction):
         player.has_flashlight = True
         player.use_flashlight = True
         pickup_sound.play()
-        TEXT.replace("RIGHT CLICK to turn off the light")
+        TEXT.replace("RIGHT CLICK to turn off the light", force=True)
         GAME_LOGIC.interaction_list.remove(self)
 
     def update(self, player):
@@ -318,8 +319,9 @@ class MimicGift(Interaction):
         return False
 
     def interact(self, player):
+        from scripts.game_logic import GAME_LOGIC
         player.has_teddy_bear = False
-        # TODO : calm down the mimic
+        GAME_LOGIC.monster_list['Mimic'].calm()  # type: ignore
 
     def update(self, player):
         ...
