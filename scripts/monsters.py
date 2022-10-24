@@ -9,6 +9,7 @@ from pygame.surface import Surface
 from scripts.visuals import VISUALS
 from scripts.display import DISPLAY
 from scripts.text import TEXT
+from scripts.game_logic import GAME_LOGIC
 from scripts.game_over import GAME_OVER_SCREEN
 from scripts.utils import load_image, add_surface_toward_player_2d, join_path, set_stereo_volume, distance_2d
 from scripts.interactions import TeddyBear
@@ -53,8 +54,6 @@ class Hangman(Monster):
 
     def update(self):
         """Update the monster each frame."""
-        from scripts.game_logic import GAME_LOGIC
-
         if not self.aggressiveness:
             return
 
@@ -112,7 +111,6 @@ class Hangman(Monster):
     def draw(self):
         """Draw the monster each frame."""
         if self.state > 0:
-            from scripts.game_logic import GAME_LOGIC
             add_surface_toward_player_2d(
                 GAME_LOGIC.RAY_CASTER,
                 GAME_LOGIC.PLAYER,
@@ -144,8 +142,6 @@ class Mimic(Monster):
 
     def update(self):
         """Update the monster each frame."""
-        from scripts.game_logic import GAME_LOGIC
-
         if not self.aggressiveness:
             return
 
@@ -205,7 +201,7 @@ class Mimic(Monster):
                     ...
 
     def calm(self):
-        from scripts.game_logic import GAME_LOGIC
+
         if self.state >= 3:
             GAME_LOGIC.time_stopped = False
         self.state = 0
@@ -217,8 +213,6 @@ class Mimic(Monster):
     def draw(self):
         """Draw the monster each frame."""
 
-        from scripts.game_logic import GAME_LOGIC
-
         match self.state:
             case 0 | 1:
                 self.draw_chest()
@@ -226,7 +220,7 @@ class Mimic(Monster):
             case 2 | 3:  # phase last 10 seconds
                 self.draw_chest()
                 temp = max(0., 1.0 - self.timer / 10) if self.state == 2 else 1.0
-                # {"x", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
+                # {"z", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
                 GAME_LOGIC.RAY_CASTER.add_light(
                     -2.2, 0.2, -0.3,
                     2.0 * temp,
@@ -251,7 +245,6 @@ class Mimic(Monster):
                 )
 
     def draw_chest(self):
-        from scripts.game_logic import GAME_LOGIC
 
         # {"image", "A_x", "A_y", "A_z", "B_x", "B_y", "B_z","C_x", "C_y", "C_z", "rm", NULL};
         GAME_LOGIC.RAY_CASTER.add_surface(
@@ -295,3 +288,123 @@ class Mimic(Monster):
             -2.5 + self.x, 0.4, -0.95 + self.z,
             rm=True,
         )
+
+
+class Crawler(Monster):
+    def __init__(self):
+        super().__init__()
+        self.hand_image: Surface = load_image("data", "images", "monsters", "crawler_hand.png")
+        self.monster_image: Surface = load_image("data", "images", "monsters", "crawler.png")
+
+        self.timer = 20.
+
+        self.can_grab: bool = False
+        self.grabbed: bool = False
+
+        self.position = 0  # 0 == front_bed
+
+        self.x = 0.0
+        self.z = 0.0
+
+        self.angle_y = 0.0
+
+    def update(self):
+
+        if not self.aggressiveness:
+            return
+
+        if self.state == 1:
+            if self.z > 0:
+                self.z = max(0., self.z - DISPLAY.delta_time * 0.1)
+                return
+
+            if self.grabbed:
+                self.timer -= DISPLAY.delta_time
+                if self.timer <= 0:
+                    self.grabbed = False
+                    self.timer = 3.
+                    return
+                VISUALS.shake = 1.0
+                VISUALS.fish_eye = 1.0
+                GAME_LOGIC.PLAYER.x = 0
+                GAME_LOGIC.PLAYER.z = 0.3
+                GAME_LOGIC.PLAYER.angle_y = 90
+                GAME_LOGIC.PLAYER.angle_x = -90
+                return
+
+            if self.can_grab:
+                if self.position == 0:
+                    if distance_2d(GAME_LOGIC.PLAYER.pos, (0., 0., 1.5)) < 1.1:
+                        self.grabbed = True
+                        self.can_grab = False
+                        self.timer = 5.
+                        return
+            else:
+                self.timer -= DISPLAY.delta_time
+                if self.timer <= 0:
+                    self.can_grab = True
+                    self.timer = 20.
+                return
+
+        elif self.state == 2:
+            self.timer -= DISPLAY.delta_time
+            if self.timer <= 0:
+                self.timer = 1.0
+                target = GAME_LOGIC.PLAYER.pos if not (GAME_LOGIC.PLAYER.in_wardrobe or GAME_LOGIC.PLAYER.in_bed) else (0, 0, 1.3)
+
+                self.angle_y = atan2(target[0] - self.x, target[2] - self.z)
+
+                self.x += sin(self.angle_y) * 0.5
+                self.z += cos(self.angle_y) * 0.5
+
+                if distance_2d((self.x, 0.0, self.z), target) < 1.0:
+                    if GAME_LOGIC.PLAYER.in_wardrobe or GAME_LOGIC.PLAYER.in_bed:
+                        self.state = 0
+                        self.timer = 20.
+                        GAME_LOGIC.time_stopped = False
+                    else:
+                        GAME_OVER_SCREEN.reason = "When the crawler is coming for you, get in the bed or in the wardrobe."
+                        GAME_OVER_SCREEN.killer = "crawler"
+                        GAME_LOGIC.game_over()
+
+        if GAME_LOGIC.time_stopped:
+            return
+
+        self.timer -= DISPLAY.delta_time * (1 + self.aggressiveness / 10) * randint(1, 3) / 3
+        if self.timer <= 0:
+            self.state += 1
+            match self.state:
+                case 1:
+                    self.z = 0.5
+                    self.can_grab = True
+                    self.timer = 30.
+                case 2:
+                    #TODO: sounds
+                    self.x = 0.
+                    self.z = 1.3
+                    self.timer = 2.5
+                    GAME_LOGIC.time_stopped = True
+
+    def draw(self):
+
+        if not self.aggressiveness or not self.state:
+            return
+
+        match self.state:
+            case 1:
+                GAME_LOGIC.RAY_CASTER.add_surface(
+                    self.hand_image,
+                    -0.2 + (sin(self.timer * 2) / 20) * (not self.grabbed), 0.05, 1.52 + self.z,
+                    0.2 + (sin(self.timer * 2) / 20) * (not self.grabbed), 0.2 + (sin(self.timer * 1.5) / 30) * (not self.grabbed), 1.0 + self.z,
+                    -0.2 + (sin(self.timer * 2) / 20) * (not self.grabbed), 0.2 + (sin(self.timer * 1.5) / 30) * (not self.grabbed), 1.0 + self.z,
+                    rm=True,
+                )
+            case 2:
+                add_surface_toward_player_2d(
+                    GAME_LOGIC.RAY_CASTER,
+                    GAME_LOGIC.PLAYER,
+                    self.monster_image,
+                    (self.x, 0, self.z),
+                    0.7,
+                    0.7,
+                )

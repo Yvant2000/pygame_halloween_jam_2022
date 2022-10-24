@@ -7,8 +7,7 @@ from scripts.text import TEXT
 from scripts.input_handler import INPUT
 from scripts.game_over import GAME_OVER_SCREEN
 from scripts.surface_loader import load_static_surfaces
-from scripts.interactions import Interaction, BedsideLamp, Bed, FlashLight, Wardrobe, Amogos, MimicGift
-from scripts.monsters import Monster, Hangman, Mimic
+from scripts.interactions import Interaction, BedsideLamp, Bed, FlashLight, Wardrobe, BabyPhone, MimicGift
 from scripts.visuals import hand_visual, VISUALS, wardrobe_visual
 from scripts.utils import GameState
 
@@ -28,12 +27,14 @@ class GAME_LOGIC:
     time_stopped: bool
 
     interaction_list: list[Interaction]
-    monster_list: dict[str, Monster]
+    monster_list: dict
 
     ENDLESS: bool
 
     @classmethod
     def reset(cls, endless: bool = False):
+        from scripts.monsters import Hangman, Mimic, Crawler
+
         cls.ENDLESS = endless
 
         VISUALS.reset()
@@ -54,16 +55,18 @@ class GAME_LOGIC:
             BedsideLamp((1.3, 0.5, 3.2)),
             Bed((0, 0.5, 3)),
             Wardrobe((0, 1, -3.21), (-0.4, 1, -3.5)),
-            Amogos((-1.5, 1.1, 2.7)),
+            BabyPhone((-1.5, 1.1, 2.7)),
             MimicGift((-2.3, 0.4, -0.2)),
         ]
 
         cls.monster_list = {
             "Hangman": Hangman(),
             "Mimic": Mimic(),
+            "Crawler": Crawler(),
         }
-        cls.monster_list["Hangman"].aggressiveness = 20
+        # cls.monster_list["Hangman"].aggressiveness = 20
         # cls.monster_list["Mimic"].aggressiveness = 20
+        # cls.monster_list["Crawler"].aggressiveness = 20
 
         TEXT.replace("Inspect the room.", duration=3, fade_out=0, force=True)
         TEXT.add("Move with WASD.", duration=3, fade_out=0, force=True)
@@ -118,7 +121,7 @@ class GAME_LOGIC:
 
         cls.SURFACE.fill((0, 0, 0))
 
-        # {"x", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
+        # {"z", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
         cls.RAY_CASTER.add_light(
             cls.PLAYER.x, cls.PLAYER.height, cls.PLAYER.z,
             3.,
@@ -177,7 +180,7 @@ class GAME_LOGIC:
                     direction_z=cls.PLAYER.z + cls.PLAYER.look_direction[2] * DISPLAY.VIEW_DISTANCE * 1.8,
                 )
 
-            # {"dst_surface", "x", "y", "z", "angle_x", "angle_y", "fov", "view_distance", "rad", NULL};
+            # {"dst_surface", "z", "y", "z", "angle_x", "angle_y", "fov", "view_distance", "rad", NULL};
             cls.RAY_CASTER.raycasting(
                 cls.SURFACE,
                 cls.PLAYER.x,

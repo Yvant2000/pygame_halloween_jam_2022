@@ -62,7 +62,7 @@ class Player:
 
     def update(self):
 
-        # print(self.x, self.z)
+        # print(self.z, self.z)
 
         if self.has_flashlight:
             if INPUT.flash_light():

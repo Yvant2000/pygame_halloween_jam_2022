@@ -92,7 +92,7 @@ class BedsideLamp(Interaction):
         from scripts.game_logic import GAME_LOGIC
 
         if self.light:
-            # {"x", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
+            # {"z", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
             GAME_LOGIC.RAY_CASTER.add_light(
                 *self.pos, 3.,
                 0.9, 0.8, 0.4,
@@ -208,11 +208,12 @@ class Wardrobe(Interaction):
             rm=True)
 
 
-class Amogos(Interaction):
+class BabyPhone(Interaction):
     def __init__(self, pos):
         self.pos = pos
         self.image: Surface = load_image("data", "images", "props", "babyphone.png")
         self.image_alert: Surface = load_image("data", "images", "props", "babyphone_alert.png")
+        self.image_on: Surface = load_image("data", "images", "props", "babyphone_on.png")
 
         self.alert: bool = False
         self.channel: Channel = Channel(1)
@@ -238,9 +239,17 @@ class Amogos(Interaction):
 
         if self.channel.get_busy():
             set_stereo_volume(GAME_LOGIC.PLAYER, self.pos, self.channel)
+            return add_surface_toward_player_2d(
+                GAME_LOGIC.RAY_CASTER,
+                player,
+                self.image_on,
+                self.pos,
+                0.5,
+                0.5,
+            )
 
         if self.alert:
-            # {"x", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
+            # {"z", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
             GAME_LOGIC.RAY_CASTER.add_light(
                 *self.pos,
                 0.8,
@@ -300,7 +309,7 @@ class TeddyBear(Interaction):
             0.5,
         )
         if not GAME_LOGIC.PLAYER.use_flashlight and not GAME_LOGIC.PLAYER.bedside_light:
-            # {"x", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
+            # {"z", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
             GAME_LOGIC.RAY_CASTER.add_light(
                 self.pos[0], self.pos[1] + 0.2, self.pos[2],
                 0.4,

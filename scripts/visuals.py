@@ -21,6 +21,7 @@ class VISUALS:
 
     shake: float
     min_shake: float
+    _shake: float
 
     fish_eye: float
     min_fish_eye: float
@@ -38,6 +39,7 @@ class VISUALS:
 
         cls.shake = 0.
         cls.min_shake = 0.
+        cls._shake = 0.
 
         cls.fish_eye = 0.
         cls.min_fish_eye = 0.
@@ -51,12 +53,13 @@ class VISUALS:
     @classmethod
     def display(cls):
         if cls.shake:
+            cls._shake += DISPLAY.delta_time
             effect = DISPLAY.screen.copy()
             DISPLAY.screen.fill((0, 0, 0))
             DISPLAY.screen.blit(
                 effect,
-                (((sin(cls.shake) * 1000) % cls.shake - cls.shake/2) * 20,
-                 ((sin(cls.shake) * 10000) % cls.shake - cls.shake/2) * 15))
+                (((sin(cls._shake) * 1000) % cls.shake - cls.shake/2) * 20,
+                 ((sin(cls._shake) * 10000) % cls.shake - cls.shake/2) * 15))
             cls.shake = max(cls.min_shake, cls.shake - DISPLAY.delta_time)
 
         if cls.fish_eye:
