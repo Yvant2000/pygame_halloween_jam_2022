@@ -5,37 +5,33 @@ from scripts.utils import load_image, repeat_texture
 
 
 def load_static_surfaces(caster: RayCaster) -> None:
-    wall_texture = load_image("data", "images", "textures", "wall_texture.png")
-
     # WALLS
 
     # {"image", "A_x", "A_y", "A_z", "B_x", "B_y", "B_z","C_x", "C_y", "C_z", "rm", NULL};
     caster.add_surface(
-        repeat_texture(wall_texture, 5, 3),
+        load_image("data", "images", "textures", "wall_back.png"),
         -2.5, 3, 3.5,
         2.5, 0, 3.5,
     )
     caster.add_surface(
-        repeat_texture(wall_texture, 7, 3),
+        load_image("data", "images", "textures", "wall_left.png"),
         -2.5, 3, -3.5,
         -2.5, 0, 3.5,
     )
     caster.add_surface(
-        repeat_texture(wall_texture, 7, 3),
+        load_image("data", "images", "textures", "wall_right.png"),
         2.5, 3, 3.5,
         2.5, 0, -3.5,
     )
     caster.add_surface(
-        repeat_texture(wall_texture, 5, 3),
+        load_image("data", "images", "textures", "wall_front.png"),
         2.5, 3, -3.5,
         -2.5, 0, -3.5,
     )
 
-    del wall_texture
-
     # FLOOR
     caster.add_surface(
-        repeat_texture(load_image("data", "images", "textures", "ground_texture.png"), 5, 7),
+        load_image("data", "images", "textures", "ground.png"),
         2.55, 0, -3.55,
         -2.55, 0, 3.55,
         2.55, 0, 3.55,
@@ -58,17 +54,17 @@ def load_static_surfaces(caster: RayCaster) -> None:
 
     caster.add_surface(
         load_image("data", "images", "props", "bed_left.png"),
-        -0.8, 0.4, 3.5,
-        -0.8, 0, 1.5)
+        -0.79, 0.4, 3.5,
+        -0.79, 0, 1.5)
     caster.add_surface(
         load_image("data", "images", "props", "bed_right.png"),
-        0.8, 0, 3.5,
-        0.8, 0.4, 1.5)
+        0.79, 0, 3.5,
+        0.79, 0.4, 1.5)
 
     caster.add_surface(
         load_image("data", "images", "props", "front_bed.png"),
-        -0.8, 0.4, 1.52,
-        0.8, 0.0, 1.52)
+        -0.8, 0.4, 1.51,
+        0.8, 0.0, 1.51)
 
     # WARDROBE
     caster.add_surface(
@@ -88,9 +84,9 @@ def load_static_surfaces(caster: RayCaster) -> None:
 
     caster.add_surface(
         load_image("data", "images", "props", "wardrobe_top.png"),
-        -1.6, 1.9, -3.5,
-        0.0, 1.91, -3.2,
-        -1.6, 1.91, -3.2)
+        -0.0, 2.0, -3.2,
+        -1.6, 2.01, -3.5,
+        -0.0, 2.01, -3.5)
 
     #NIGHTSTAND
 
@@ -138,4 +134,29 @@ def load_static_surfaces(caster: RayCaster) -> None:
         -1.0, 1.1, 3.5,
         -1.0, 1.1, 2.2,
     )
+
+    # LITTLE TABLE
+
+    caster.add_surface(
+        load_image("data", "images", "props", "table_front.png"),
+        2.0, 0.4, -3.1,
+        0.9, 0.0, -3.1)
+
+    caster.add_surface(
+        load_image("data", "images", "props", "table_side.png"),
+        0.9, 0.4, -3.1,
+        0.9, 0.0, -3.5)
+
+    caster.add_surface(
+        load_image("data", "images", "props", "table_top.png"),
+        0.9, 0.4, -3.1,
+        2.0, 0.4, -3.5,
+        0.9, 0.4, -3.5)
+
+    caster.add_surface(
+        load_image("data", "images", "props", "photo.png"),
+        1.4, 0.65, -3.3,
+        1.1, 0.4, -3.2,
+        1.4, 0.4, -3.2)
+
 

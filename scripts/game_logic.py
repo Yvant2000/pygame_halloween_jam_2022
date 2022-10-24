@@ -7,8 +7,8 @@ from scripts.text import TEXT
 from scripts.input_handler import INPUT
 from scripts.game_over import GAME_OVER_SCREEN
 from scripts.surface_loader import load_static_surfaces
-from scripts.interactions import Interaction, Test_Interaction, BedsideLamp, Bed, FlashLight, Wardrobe, Amogos
-from scripts.monsters import Monster, Hangman
+from scripts.interactions import Interaction, BedsideLamp, Bed, FlashLight, Wardrobe, Amogos, MimicGift
+from scripts.monsters import Monster, Hangman, Mimic
 from scripts.visuals import hand_visual, VISUALS, wardrobe_visual
 from scripts.utils import GameState
 
@@ -41,7 +41,7 @@ class GAME_LOGIC:
 
         cls.PLAYER = Player()
         cls.RAY_CASTER = RayCaster()
-        cls.SURFACE = Surface((128, 72))  # 16:9
+        cls.SURFACE = Surface((128*1, 72*1))  # 16:9
 
         load_static_surfaces(cls.RAY_CASTER)
 
@@ -50,16 +50,17 @@ class GAME_LOGIC:
         cls.time_stopped = False
 
         cls.interaction_list = [
-            FlashLight((1, 0, -3)),
-            Test_Interaction((0, 0, 0)),
-            BedsideLamp((1.3, 0.5, 3.3)),
+            FlashLight((1.8, 0.4, -3.2)),
+            BedsideLamp((1.3, 0.5, 3.2)),
             Bed((0, 0.5, 3)),
             Wardrobe((0, 1, -3.21), (-0.4, 1, -3.5)),
-            Amogos((-1.5, 1.1, 2.9)),
+            Amogos((-1.5, 1.1, 2.7)),
+            MimicGift((-2.3, 0.4, -0.2)),
         ]
 
         cls.monster_list = {
             "Hangman": Hangman(),
+            "Mimic": Mimic(),
         }
         # cls.monster_list["Hangman"].aggressiveness = 1
 

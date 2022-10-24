@@ -22,6 +22,10 @@ MAP_COLLISIONS: tuple[Rect, ...] = (
     Rect(13, 30, 6, 5),  # nightstand
 
     Rect(-25, 23, 20, 10),  # closet
+
+    Rect(9, -30, 11, 4),  # table
+
+    Rect(-20, -8, 6, 16)  # chest mimic
 )
 
 

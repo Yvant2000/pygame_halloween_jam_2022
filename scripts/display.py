@@ -25,6 +25,7 @@ class DISPLAY:
     def update(cls):
         pg_display.update()
         cls.delta_time = cls.CLOCK.tick(cls.FPS) / 1000
+        # print(cls.CLOCK.get_fps())
 
     @classmethod
     def display(cls, surface: Surface):

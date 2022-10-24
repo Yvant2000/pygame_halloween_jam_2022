@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from random import choice as random_choice
+
 from pygame import Surface
 from pygame.mixer import Channel, Sound
 
@@ -7,6 +9,9 @@ from scripts.text import TEXT
 from scripts.utils import distance, join_path, set_stereo_volume, load_image, add_surface_toward_player_2d
 from scripts.visuals import VISUALS
 from scripts.display import DISPLAY
+
+
+pickup_sound: Sound = Sound(join_path("data", "sounds", "sfx", "pickup.ogg"))
 
 
 class Interaction(ABC):
@@ -111,6 +116,7 @@ class BedsideLamp(Interaction):
 class Bed(Interaction):
     def __init__(self, pos):
         self.pos = pos
+        self.sound: Sound = Sound(join_path("data", "sounds", "sfx", "bed2.ogg"))
 
     def can_interact(self, player) -> bool:
         if player.is_looking_at(self.pos) and distance(player.pos, self.pos) < 3:
@@ -120,6 +126,7 @@ class Bed(Interaction):
 
     def interact(self, player):
         player.in_bed = True
+        self.sound.play()
 
     def update(self, player):
         if player.in_bed:
@@ -132,15 +139,16 @@ class FlashLight(Interaction):
         self.image: Surface = load_image("data", "images", "props", "flashlight.png")
 
     def can_interact(self, player) -> bool:
-        if player.is_looking_at(self.pos) and distance(player.pos, self.pos) < 2.0:
+        if player.is_looking_at(self.pos, 0.5) and distance(player.pos, self.pos) < 2.0:
             TEXT.replace("Get the flashlight", duration=0.0, fade_out=0.3, color=(100, 100, 100))
             return True
         return False
 
     def interact(self, player):
         from scripts.game_logic import GAME_LOGIC
-        player.have_flashlight = True
+        player.has_flashlight = True
         player.use_flashlight = True
+        pickup_sound.play()
         TEXT.replace("RIGHT CLICK to turn off the light")
         GAME_LOGIC.interaction_list.remove(self)
 
@@ -187,7 +195,7 @@ class Wardrobe(Interaction):
 
     def update(self, player):
         if self.opening:
-            self.x = min(0.8, self.x + 1.2 * DISPLAY.delta_time)
+            self.x = min(0.70, self.x + 1.2 * DISPLAY.delta_time)
         else:
             self.x = max(0., self.x - 1.2 * DISPLAY.delta_time)
 
@@ -214,7 +222,7 @@ class Amogos(Interaction):
             return False
 
         if player.is_looking_at(self.pos, 0.4) and distance(player.pos, self.pos) < 2.0:
-            TEXT.replace("Turn of the baby-phone", duration=0.0, fade_out=0.3, color=(100, 100, 100))
+            TEXT.replace("Listen to the baby-phone", duration=0.0, fade_out=0.3, color=(100, 100, 100))
             return True
         return False
 
@@ -233,7 +241,7 @@ class Amogos(Interaction):
         if self.alert:
             # {"x", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
             GAME_LOGIC.RAY_CASTER.add_light(
-                self.pos,
+                *self.pos,
                 0.8,
                 0.8, 0.2, 0.3,
             )
@@ -253,3 +261,66 @@ class Amogos(Interaction):
             0.5,
             0.5,
         )
+
+
+class TeddyBear(Interaction):
+    def __init__(self):
+        self.pos: tuple[float, float, float] = random_choice((
+            (-2.26, 0.0, 2.2),
+            (-2.0, 1.1, 2.4),
+            (2.0, 0.0, 3.3),
+            (1.3, 0.0, -3.3),
+            (-2.0, 0.0, -3.3),
+            (2.3, 0.0, -3.3),
+            (0, 0, 0),
+        ))
+        self.image: Surface = load_image("data", "images", "props", "teddy_bear.png")
+
+    def can_interact(self, player) -> bool:
+        if player.is_looking_at(self.pos, 0.6) and distance(player.pos, self.pos) < 1.5:
+            TEXT.replace("Pick up George", duration=0.0, fade_out=0.3, color=(100, 100, 100))
+            return True
+        return False
+
+    def interact(self, player):
+        from scripts.game_logic import GAME_LOGIC
+        GAME_LOGIC.interaction_list.remove(self)
+        pickup_sound.play()
+        player.has_teddy_bear = True
+
+    def update(self, player):
+        from scripts.game_logic import GAME_LOGIC
+        add_surface_toward_player_2d(
+            GAME_LOGIC.RAY_CASTER,
+            player,
+            self.image,
+            self.pos,
+            0.5,
+            0.5,
+        )
+        if not GAME_LOGIC.PLAYER.use_flashlight and not GAME_LOGIC.PLAYER.bedside_light:
+            # {"x", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
+            GAME_LOGIC.RAY_CASTER.add_light(
+                self.pos[0], self.pos[1] + 0.2, self.pos[2],
+                0.4,
+                0.8, 0.8, 0.1,
+            )
+
+
+class MimicGift(Interaction):
+    def __init__(self, pos):
+        self.pos = pos
+
+    def can_interact(self, player) -> bool:
+        if player.has_teddy_bear and player.is_looking_at(self.pos, 0.7) and distance(player.pos, self.pos) < 2.5:
+            TEXT.replace("Give back the friend", duration=0.0, fade_out=0.3, color=(100, 100, 100))
+            return True
+        return False
+
+    def interact(self, player):
+        player.has_teddy_bear = False
+        # TODO : calm down the mimic
+
+    def update(self, player):
+        ...
+

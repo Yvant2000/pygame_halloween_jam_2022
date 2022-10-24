@@ -110,3 +110,69 @@ class Hangman(Monster):
                 self.width,
                 self.height,
             )
+
+
+class Mimic(Monster):
+    def __init__(self):
+        super().__init__()
+
+        self.front_image = load_image("data", "images", "props", "chest_front.png")
+        self.side_image = load_image("data", "images", "props", "chest_side.png")
+        self.top_image = load_image("data", "images", "props", "chest_top.png")
+
+    def update(self):
+        """Update the monster each frame."""
+        ...
+
+    def draw(self):
+        """Draw the monster each frame."""
+
+        if self.state == 0:
+            self.draw_chest()
+            return
+
+    def draw_chest(self):
+        from scripts.game_logic import GAME_LOGIC
+
+        # {"image", "A_x", "A_y", "A_z", "B_x", "B_y", "B_z","C_x", "C_y", "C_z", "rm", NULL};
+        GAME_LOGIC.RAY_CASTER.add_surface(
+            self.front_image,
+            -1.9, 0.41, -0.95,
+            -1.9, 0.0, 0.35,
+            rm=True,
+        )
+        GAME_LOGIC.RAY_CASTER.add_surface(
+            self.side_image,
+            -2.5, 0.6, -0.95,
+            -1.9, 0.0, -0.95,
+            rm=True,
+        )
+        GAME_LOGIC.RAY_CASTER.add_surface(
+            self.side_image,
+            -2.5, 0.6, 0.35,
+            -1.9, 0.0, 0.35,
+            rm=True,
+        )
+        GAME_LOGIC.RAY_CASTER.add_surface(
+            self.top_image,
+            -2.31, 0.6, -0.95,
+            -2.09, 0.6, 0.35,
+            -2.09, 0.6, -0.95,
+            rm=True,
+        )
+
+        GAME_LOGIC.RAY_CASTER.add_surface(
+            self.top_image,
+            -2.1, 0.6, -0.95,
+            -1.89, 0.4, 0.35,
+            -1.89, 0.4, -0.95,
+            rm=True,
+        )
+
+        GAME_LOGIC.RAY_CASTER.add_surface(
+            self.top_image,
+            -2.3, 0.6, -0.95,
+            -2.5, 0.4, 0.35,
+            -2.5, 0.4, -0.95,
+            rm=True,
+        )

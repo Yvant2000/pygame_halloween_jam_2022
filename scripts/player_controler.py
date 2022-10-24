@@ -1,11 +1,12 @@
 from math import sin, cos, radians
 
 from pygame import Rect
+from pygame.mixer import Sound
 
 from scripts.display import DISPLAY
 from scripts.input_handler import INPUT
 from scripts.utils import MAP_COLLISIONS
-from scripts.utils import line_point_distance
+from scripts.utils import line_point_distance, join_path
 
 
 class Player:
@@ -25,8 +26,9 @@ class Player:
 
         self.gravity: float = 2.2
 
-        self.have_flashlight: bool = False
+        self.has_flashlight: bool = False
         self.use_flashlight: bool = False
+        self.has_teddy_bear: bool = False
 
         self.bedside_light: bool = False
 
@@ -37,19 +39,35 @@ class Player:
 
         self.cancel: tuple[float, float] = (0, 0)
 
+        self.flashlight_sound = Sound(join_path("data", "sounds", "sfx", "flashlight.ogg"))
+        self.steps_sound: tuple[Sound, Sound] = (
+            Sound(join_path("data", "sounds", "sfx", "step1.ogg")),
+            Sound(join_path("data", "sounds", "sfx", "step2.ogg"))
+        )
+        self.step_count: int = 0
+        self.step_wait: float = 0.
+
+        self.moved: bool = False
+
     @property
     def pos(self) -> tuple[float, float, float]:
         return self.x, self.y + self.height, self.z
 
-    def collision(self) -> bool:
+    def collision(self):
         if Rect(int(self.x * 10), int(self.z * 10), 5, 5).collidelist(MAP_COLLISIONS) != -1:
             self.x, self.z = self.cancel
+            return
         self.cancel = self.x, self.z
+        self.moved = True
 
     def update(self):
 
-        if self.have_flashlight:
+        # print(self.x, self.z)
+
+        if self.has_flashlight:
             if INPUT.flash_light():
+                self.flashlight_sound.stop()
+                self.flashlight_sound.play()
                 self.use_flashlight = not self.use_flashlight
 
         if self.in_bed or self.in_wardrobe:
@@ -63,6 +81,7 @@ class Player:
         speed = self.run_speed if INPUT.sprint() else self.walk_speed
 
         self.cancel = self.x, self.z
+        self.moved = False
 
         if INPUT.up():
             self.x += speed * cos(radians(self.angle_y)) * DISPLAY.delta_time
@@ -87,6 +106,16 @@ class Player:
             self.collision()
             self.z -= speed * sin(radians(self.angle_y + 90)) * DISPLAY.delta_time
             self.collision()
+
+        if self.y > 0:
+            self.step_wait = 0.
+        elif self.moved:
+            self.step_wait -= DISPLAY.delta_time
+            if self.step_wait <= 0:
+                self.step_wait = 0.5 if INPUT.sprint() else 0.7
+                self.step_count = (self.step_count + 1) % 2
+                if self.steps_sound[self.step_count].get_num_channels() == 0:
+                    self.steps_sound[self.step_count].play()
 
         # self.collision()
 
