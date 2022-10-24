@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 
 from random import randint
+from math import sin
 
-from pygame.mixer import Sound, Channel, find_channel
+from pygame.mixer import Sound, Channel
 
 from scripts.visuals import VISUALS
 from scripts.display import DISPLAY
@@ -36,6 +37,7 @@ class Hangman(Monster):
 
         self.image = load_image("data", "images", "monsters", "hangman.png")
         self.x = 0
+        self.y = 2.0
         self.z = 0
         self.width = 1
         self.height = 2.5
@@ -55,9 +57,9 @@ class Hangman(Monster):
             return
 
         if self.state:
+            self.y = max(0., self.y - DISPLAY.delta_time)
             set_stereo_volume(GAME_LOGIC.PLAYER, (self.x, 1, self.z), self.channel)
-            self.danger_channel.set_volume(self.madness)
-            if GAME_LOGIC.PLAYER.is_looking_at((self.x, 1.4, self.z), 1.3):
+            if GAME_LOGIC.PLAYER.is_looking_at((self.x, 1.4 + self.y, self.z), 1.5):
                 if len(TEXT.text_list) < 2:
                     TEXT.add(
                         " " * randint(0, 5) + "LOOK AT ME" + " " * randint(0, 5),
@@ -74,6 +76,8 @@ class Hangman(Monster):
             else:
                 self.madness -= DISPLAY.delta_time * 0.2
 
+            self.danger_channel.set_volume(self.madness)
+
             if self.madness > 1.0:
                 GAME_OVER_SCREEN.reason = "Don't look at the hangman. Listen carefully for the rope."
                 GAME_LOGIC.game_over()
@@ -86,17 +90,18 @@ class Hangman(Monster):
             self.state = not self.state
             if self.state:
                 self.timer = 10 + self.aggressiveness
-                self.channel = find_channel(True)
                 self.channel.play(self.rope_sound, loops=-1)
-                self.danger_channel = find_channel(True)
-                self.danger_channel.set_volume(0)
+                self.danger_channel.set_volume(0, 0)
                 self.danger_channel.play(self.danger_sound, loops=-1)
                 self.x = randint(-1, 2)
                 self.z = randint(-2, 3)
             else:
                 self.channel.stop()
                 self.danger_channel.stop()
+                self.danger_channel.set_volume(0)
                 self.timer = 35 - self.aggressiveness
+                self.madness = 0.
+                self.y = 2.0
 
     def draw(self):
         """Draw the monster each frame."""
@@ -106,7 +111,7 @@ class Hangman(Monster):
                 GAME_LOGIC.RAY_CASTER,
                 GAME_LOGIC.PLAYER,
                 self.image,
-                (self.x, 0.5, self.z),
+                (self.x + sin(self.timer) / 10, 0.5 + self.y, self.z),
                 self.width,
                 self.height,
             )
