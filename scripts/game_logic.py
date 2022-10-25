@@ -30,6 +30,8 @@ class GAME_LOGIC:
 
     ENDLESS: bool
 
+    door_open: bool
+
     @classmethod
     def reset(cls, endless: bool = False):
         from scripts.monsters import Hangman, Mimic, Crawler, Guest
@@ -50,6 +52,8 @@ class GAME_LOGIC:
         cls.remaining_time = cls.HOUR_DURATION
         cls.time_stopped = False
 
+        cls.door_open = False
+
         cls.interaction_list = [
             FlashLight((1.8, 0.4, -3.2)),
             BedsideLamp((1.3, 0.5, 3.2)),
@@ -57,7 +61,7 @@ class GAME_LOGIC:
             Wardrobe((0, 1, -3.21), (-0.4, 1, -3.5)),
             BabyPhone((-1.5, 1.1, 2.7)),
             MimicGift((-2.3, 0.4, -0.2)),
-            Door((2.499, 1.0, -0.6))
+            Door((2.499, 1.0, -0.6)),
         ]
 
         cls.monster_list = {

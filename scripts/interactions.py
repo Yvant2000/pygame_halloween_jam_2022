@@ -330,21 +330,20 @@ class Door(Interaction):
     def __init__(self, pos):
         self.image: Surface = load_image("data", "images", "props", "door.png")
         self.pos = pos
-        self.opening: bool = False
         self.angle: float = 0
 
     def can_interact(self, player) -> bool:
         if player.is_looking_at((self.pos[0] - sin(radians(self.angle)) * 0.4, self.pos[1], self.pos[2] - cos(radians(self.angle)) * 0.4), 0.4) and distance(player.pos, self.pos) < 2.0:
-            TEXT.replace("Close the door" if self.opening else "Open the door", duration=0.0, fade_out=0.3, color=(100, 100, 100))
+            TEXT.replace("Close the door" if GAME_LOGIC.door_open else "Open the door", duration=0.0, fade_out=0.3, color=(100, 100, 100))
             return True
         return False
 
     def interact(self, player):
-        self.opening = not self.opening
+        GAME_LOGIC.door_open = not GAME_LOGIC.door_open
 
     def update(self, player):
 
-        if self.opening:
+        if GAME_LOGIC.door_open:
             self.angle = min(90., self.angle + DISPLAY.delta_time * 110)
         else:
             self.angle = max(0., self.angle - DISPLAY.delta_time * 110)
@@ -355,5 +354,3 @@ class Door(Interaction):
             self.pos[0] - sin(radians(self.angle)) * 0.8, 2.0, self.pos[2] - cos(radians(self.angle)) * 0.8,
             rm=True
         )
-
-

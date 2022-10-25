@@ -420,15 +420,124 @@ class Guest(Monster):
     def __init__(self):
         super().__init__()
 
+        self.timer = 20.
+
         self.x = 1.0
-        self.state = 1
-        self.aggressiveness = 20
+        self.state = 0
+        self.running: bool = False
 
         self.eye_image: Surface = load_image("data", "images", "monsters", "guest_eye.png")
         self.running_image: Surface = load_image("data", "images", "monsters", "guest_running.png")
 
     def update(self):
-        pass
+        print(self.state)
+
+        if not self.aggressiveness:
+            return
+
+        match self.state:
+            case 1:
+                if GAME_LOGIC.PLAYER.use_flashlight and GAME_LOGIC.door_open:
+                    if GAME_LOGIC.PLAYER.is_looking_at((7., 1., -0.8), 1.5):
+                        if GAME_LOGIC.PLAYER.x > 1.2 and -1.6 < GAME_LOGIC.PLAYER.z < -0.4:
+                            self.x -= DISPLAY.delta_time
+                            if self.x <= 0:
+                                self.state = 0
+                                self.timer = 20.
+                            return
+                self.x = min(1.0, self.x + DISPLAY.delta_time)
+            case 2:
+                if self.running:
+                    self.x -= DISPLAY.delta_time * 2.5
+                    if self.x <= 0:
+                        if not GAME_LOGIC.door_open:
+                            # TODO: sound hurt the door
+                            self.state = 1
+                            self.x = 1.0
+                            self.timer = 20.
+                            return
+                        if GAME_LOGIC.PLAYER.in_wardrobe:
+                            if GAME_LOGIC.PLAYER.use_flashlight:
+                                GAME_OVER_SCREEN.reason = "The Guest can find you if you use the flashlight."
+                                GAME_OVER_SCREEN.killer = "guest"
+                                GAME_LOGIC.game_over()
+                                return
+                            # TODO: sound can't find you
+                            self.timer = 20.
+                            self.x = 4.5
+                            self.running = False
+                            return
+                        GAME_OVER_SCREEN.reason = "When the Guest runs towards you, close the door as fast as you can."
+                        GAME_OVER_SCREEN.killer = "guest"
+                        GAME_LOGIC.game_over()
+                    return
+                if GAME_LOGIC.PLAYER.use_flashlight and GAME_LOGIC.door_open:
+                    if GAME_LOGIC.PLAYER.is_looking_at((7., 1., -0.8), 1.5):
+                        if GAME_LOGIC.PLAYER.x > 1.2 and -1.6 < GAME_LOGIC.PLAYER.z < -0.4:
+                            self.running = True
+                            return
+            case 3:
+                if GAME_LOGIC.door_open:
+                    if GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light:
+                        if GAME_LOGIC.PLAYER.in_wardrobe:
+                            if GAME_LOGIC.PLAYER.use_flashlight:
+                                GAME_OVER_SCREEN.reason = "The Guest can find you if you use the flashlight."
+                                GAME_OVER_SCREEN.killer = "guest"
+                                GAME_LOGIC.game_over()
+                                return
+                            # TODO: sound can't find you
+                            self.timer = 20.
+                            self.x = 4.5
+                            self.running = False
+                            self.state = 2
+                            return
+                        GAME_OVER_SCREEN.reason = "Listen if the Guest is at the door, and don't light up the room, but hide the closet."
+                        GAME_OVER_SCREEN.killer = "guest"
+                        GAME_LOGIC.game_over()
+                        return
+                    # TODO: play breath sound
+
+        if GAME_LOGIC.time_stopped and self.state < 3:
+            return
+
+        self.timer -= (
+                DISPLAY.delta_time
+                * (1 + self.aggressiveness / 10)
+                * randint(1, 3) / 3
+                * (1 + GAME_LOGIC.door_open)
+        )
+        if self.timer <= 0:
+            self.state += 1
+            match self.state:
+                case 1:
+                    self.x = 0.1
+                    self.timer = 20.
+                case 2:
+                    self.timer = 20.
+                    self.x = 4.5
+                    self.running = False
+                case 3:
+                    self.timer = 20.
+                    GAME_LOGIC.time_stopped = True
+                case 4:
+                    GAME_LOGIC.door_open = True
+                    # TODO: sound door open
+                    if GAME_LOGIC.PLAYER.in_wardrobe:
+                        if GAME_LOGIC.PLAYER.use_flashlight:
+                            GAME_OVER_SCREEN.reason = "The Guest can find you if you use the flashlight."
+                            GAME_OVER_SCREEN.killer = "guest"
+                            GAME_LOGIC.game_over()
+                            return
+                        # TODO: sound can't find you
+                        self.timer = 20.
+                        self.x = 4.5
+                        self.running = False
+                        self.state = 2
+                        GAME_LOGIC.time_stopped = False
+                        return
+                    GAME_OVER_SCREEN.reason = "The Guest will try to come to your room by the door. If you hide in the closet, he won't find you."
+                    GAME_OVER_SCREEN.killer = "guest"
+                    GAME_LOGIC.game_over()
 
     def draw(self):
         if not self.aggressiveness or not self.state:
@@ -442,5 +551,18 @@ class Guest(Monster):
                     8.0 - self.x, 0.0, -1.4,
                     rm=True,
                 )
-
-
+            case 2:
+                if self.running:
+                    GAME_LOGIC.RAY_CASTER.add_surface(
+                        self.running_image,
+                        2.5 + self.x, 2.0, -0.2,
+                        2.5 + self.x, 0.0, -1.4,
+                        rm=True,
+                    )
+                else:
+                    GAME_LOGIC.RAY_CASTER.add_surface(
+                        self.eye_image,
+                        7.0, 2.0, -0.2,
+                        7.0, 0.0, -1.4,
+                        rm=True,
+                    )
