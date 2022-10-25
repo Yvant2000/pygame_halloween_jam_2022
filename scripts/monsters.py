@@ -9,6 +9,7 @@ from pygame.surface import Surface
 from scripts.visuals import VISUALS
 from scripts.display import DISPLAY
 from scripts.text import TEXT
+from scripts.input_handler import INPUT
 from scripts.game_logic import GAME_LOGIC
 from scripts.game_over import GAME_OVER_SCREEN
 from scripts.utils import load_image, add_surface_toward_player_2d, join_path, set_stereo_volume, distance_2d
@@ -595,8 +596,8 @@ class Mom(Monster):
             else:
                 self.angriness = max(0., self.angriness - DISPLAY.delta_time * 0.1)
 
-            VISUALS.fish_eye = self.angriness
-            VISUALS.vignette = self.angriness
+            VISUALS.fish_eye = self.angriness + VISUALS.min_fish_eye
+            VISUALS.vignette = self.angriness + VISUALS.min_vignette
 
             if self.angriness > 1.0:
                 GAME_OVER_SCREEN.killer = "mom"
@@ -636,3 +637,66 @@ class Mom(Monster):
                 1.0, 1.0, 0.0,
                 -2.5, 0.0, -1.0,
             )
+
+
+class Dad(Monster):
+    def __init__(self):
+        super().__init__()
+        self.door = None
+        self.state = False
+        self.timer = 40.
+        self.angriness: float = 0.
+
+    def update(self):
+        if not self.aggressiveness:
+            return
+
+        if self.state:
+            GAME_LOGIC.door_open = True
+            if not GAME_LOGIC.PLAYER.in_wardrobe and (INPUT.jump() or INPUT.left() or INPUT.right() or INPUT.up() or INPUT.down()):
+                self.angriness += DISPLAY.delta_time * 0.2 * (1 + self.aggressiveness / 10)
+                # TODO: sound dad angry
+
+            VISUALS.shake = self.angriness + VISUALS.min_shake
+            VISUALS.fried = self.angriness + VISUALS.min_fried
+
+            if self.angriness > 1.0:
+                GAME_OVER_SCREEN.reason = "Dad will get angry if you move."
+                GAME_OVER_SCREEN.killer = "dad"
+                GAME_LOGIC.game_over()
+
+            self.timer -= DISPLAY.delta_time
+
+        if self.timer <= 0:
+            self.state = not self.state
+            if self.state:
+                GAME_LOGIC.time_stopped = True
+                self.angriness = 0.
+                self.timer = 15.
+                self.door.angle = 90.
+                # TODO: sound door open
+                # TODO: sound dad
+                # TODO: sound light
+            else:
+                GAME_LOGIC.time_stopped = False
+                self.timer = 60.
+                # TODO: sound light off
+
+        if GAME_LOGIC.time_stopped:
+            return
+
+        self.timer -= (
+                DISPLAY.delta_time
+                * (1 + self.aggressiveness / 10)
+                * randint(1, 3) / 3
+        )
+
+    def draw(self):
+        if self.state:
+            GAME_LOGIC.RAY_CASTER.add_light(
+                2.5, 2.0, -1.0,
+                5.0,
+                1.0, 0.0, 0.0,
+                -2.5, 0.0, -1.0,
+            )
+

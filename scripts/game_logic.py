@@ -34,7 +34,7 @@ class GAME_LOGIC:
 
     @classmethod
     def reset(cls, endless: bool = False):
-        from scripts.monsters import Hangman, Mimic, Crawler, Guest, Mom
+        from scripts.monsters import Hangman, Mimic, Crawler, Guest, Mom, Dad
         from scripts.interactions import BedsideLamp, Bed, FlashLight, Wardrobe, BabyPhone, MimicGift, Door
 
         cls.ENDLESS = endless
@@ -60,18 +60,18 @@ class GAME_LOGIC:
             "Crawler": Crawler(),
             "Guest": Guest(),
             "Mom": Mom(),
+            "Dad": Dad(),
         }
         # cls.monster_list["Hangman"].aggressiveness = 20
         # cls.monster_list["Mimic"].aggressiveness = 20
         # cls.monster_list["Crawler"].aggressiveness = 20
         # cls.monster_list["Mom"].aggressiveness = 20
-
-        TEXT.replace("Inspect the room.", duration=3, fade_out=0, force=True)
-        TEXT.add("Move with WASD.", duration=3, fade_out=0, force=True)
-        TEXT.add("Interact with LEFT CLICK.", force=True)
+        # cls.monster_list["Dad"].aggressiveness = 20
 
         door = Door((2.499, 1.0, -0.6))
         cls.monster_list['Mom'].door = door
+        cls.monster_list['Dad'].door = door
+
         cls.interaction_list = [
             FlashLight((1.8, 0.4, -3.2)),
             BedsideLamp((1.3, 0.5, 3.2)),
@@ -81,6 +81,10 @@ class GAME_LOGIC:
             MimicGift((-2.3, 0.4, -0.2)),
             door,
         ]
+
+        TEXT.replace("Inspect the room with the MOUSE.", duration=3, fade_out=0, force=True)
+        TEXT.add("Move with WASD.", duration=3, fade_out=0, force=True)
+        TEXT.add("Interact with LEFT CLICK.", force=True)
 
     @classmethod
     def update(cls) -> None:
