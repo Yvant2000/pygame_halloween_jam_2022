@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from random import randint
+from random import randint, choice as random_choice
 from math import cos, sin, atan2
 
 from pygame.mixer import Sound, Channel
@@ -61,7 +61,7 @@ class Hangman(Monster):
         if self.state:
             self.y = max(0., self.y - DISPLAY.delta_time)
             set_stereo_volume(GAME_LOGIC.PLAYER, (self.x, 1, self.z), self.channel)
-            if GAME_LOGIC.PLAYER.is_looking_at((self.x, 1.4 + self.y, self.z), 1.5):
+            if (GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light) and GAME_LOGIC.PLAYER.is_looking_at((self.x, 1.4 + self.y, self.z), 1.5):
                 if len(TEXT.text_list) < 2:
                     TEXT.add(
                         " " * randint(0, 5) + "LOOK AT ME" + " " * randint(0, 5),
@@ -341,7 +341,7 @@ class Crawler(Monster):
                 GAME_LOGIC.PLAYER.angle_x = -90
                 return
 
-            if self.can_grab:
+            if self.can_grab and not GAME_LOGIC.PLAYER.in_bed:
                 if self.position == 0:
                     if distance_2d(GAME_LOGIC.PLAYER.pos, (0., 0., 1.5)) < 1.1:
                         self.grabbed = True
@@ -849,3 +849,118 @@ class Watcher(Monster):
                         (-0.4, 0.0, -3.37),
                         0.8, 2.0
                     )
+
+
+class Eye(Monster):
+    def __init__(self):
+        super().__init__()
+        self.timer = 10.
+
+        self.x = 8.
+        self.state = True
+        self.window = None
+
+        self.fear: float = 0.
+
+        self.image = load_image("data", "images", "monsters", "eye.png")
+
+    def update(self):
+        if not self.aggressiveness:
+            return
+
+        if (self.state
+                and GAME_LOGIC.PLAYER.use_flashlight
+                and GAME_LOGIC.PLAYER.is_looking_at((2.8 + self.x, 1.0, 1.6))
+                and GAME_LOGIC.PLAYER.x > 1.0
+                and GAME_LOGIC.PLAYER.z > 1.0
+                and self.x < 2.0):
+            self.fear += DISPLAY.delta_time * (1 - self.aggressiveness / 25)
+            # TODO: sound eye scared
+            VISUALS.shake = self.fear
+            VISUALS.vignette = self.fear
+            if self.fear >= 1.0:
+                # TODO: sound eye caught
+                self.state = False
+                self.timer = 20.
+            return
+        self.fear = max(0., self.fear - DISPLAY.delta_time)
+
+        if GAME_LOGIC.time_stopped:
+            return
+
+        if not self.state:
+            self.timer -= (DISPLAY.delta_time
+                           * (1 + self.aggressiveness / 10)
+                           * randint(1, 4) / 4
+                           * (0.5 * (GAME_LOGIC.PLAYER.use_flashlight + GAME_LOGIC.PLAYER.bedside_light * 2)))
+            if self.timer <= 0:
+                # TODO: sound eye wisper
+                self.state = True
+                self.fear = 0.
+                self.x = 8.
+            return
+
+        if self.x > 0:
+            self.x -= (DISPLAY.delta_time * 0.1
+                       * (1 + self.aggressiveness / 10)
+                       * (0.5 * (GAME_LOGIC.PLAYER.use_flashlight + GAME_LOGIC.PLAYER.bedside_light * 2)))
+            if self.x <= 0:
+                self.x = 0
+                #TODO: sound eye knock window
+            return
+
+        if self.window.y < 0.5:
+            self.window.y += DISPLAY.delta_time * 0.015
+            return
+
+        GAME_OVER_SCREEN.reason = "The Eye in the night got you.\n" \
+                                  "You must not let him open the window.\n" \
+                                  "Use the flashlight to make him leave, then close the window."
+        GAME_OVER_SCREEN.killer = "eye"
+        GAME_LOGIC.game_over()
+
+    def draw(self):
+        if not self.aggressiveness or not self.state:
+            return
+
+        add_surface_toward_player_2d(
+            GAME_LOGIC.RAY_CASTER,
+            GAME_LOGIC.PLAYER,
+            self.image,
+            (2.8 + self.x, 0.0, 1.6),
+            0.8, 2.0
+        )
+
+
+class Hallucination(Monster):
+    def __init__(self):
+        super().__init__()
+        self.timer = 20.
+
+    def update(self):
+        if not self.aggressiveness:
+            return
+
+        self.timer -= DISPLAY.delta_time * randint(0, 2)
+        if self.timer <= 0.:
+            self.timer = 25. - self.aggressiveness
+            match randint(0, 3):
+                case 0:
+                    VISUALS.madness += 0.03
+                    return
+
+                case 1:
+                    print("effet sonore")
+                    # TODO: sound hallucination
+                    return
+
+                case 2:
+                    random_choice(list(GAME_LOGIC.monster_list.values())).timer -= 0.2
+                    return
+
+                case 3:
+                    random_choice(list(GAME_LOGIC.monster_list.values())).aggressiveness += 1
+                    return
+
+    def draw(self):
+        ...

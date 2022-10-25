@@ -7,11 +7,12 @@ from scripts.text import TEXT
 from scripts.input_handler import INPUT
 from scripts.game_over import GAME_OVER_SCREEN
 from scripts.surface_loader import load_static_surfaces
-from scripts.visuals import hand_visual, VISUALS, wardrobe_visual, watcher_hand_visual
+from scripts.visuals import hand_visual, VISUALS, wardrobe_visual, watcher_hand_visual, madness_visual
 from scripts.utils import GameState
 
 
 from nostalgiaeraycasting import RayCaster
+from nostalgiaefilters import distortion
 
 
 class GAME_LOGIC:
@@ -38,8 +39,8 @@ class GAME_LOGIC:
 
     @classmethod
     def reset(cls, endless: bool = False):
-        from scripts.monsters import Hangman, Mimic, Crawler, Guest, Mom, Dad, Watcher
-        from scripts.interactions import BedsideLamp, Bed, FlashLight, Wardrobe, BabyPhone, MimicGift, Door, PissDrawer
+        from scripts.monsters import Hangman, Mimic, Crawler, Guest, Mom, Dad, Watcher, Eye, Hallucination
+        from scripts.interactions import BedsideLamp, Bed, FlashLight, Wardrobe, BabyPhone, MimicGift, Door, PissDrawer, Window
 
         cls.ENDLESS = endless
 
@@ -70,6 +71,8 @@ class GAME_LOGIC:
             "Mom": Mom(),
             "Dad": Dad(),
             "Watcher": Watcher(),
+            "Eye": Eye(),
+            "Hallucination": Hallucination(),
         }
         # cls.monster_list["Hangman"].aggressiveness = 20
         # cls.monster_list["Mimic"].aggressiveness = 20
@@ -80,6 +83,8 @@ class GAME_LOGIC:
         door = Door((2.499, 1.0, -0.6))
         cls.monster_list['Mom'].door = door
         cls.monster_list['Dad'].door = door
+        window = Window((2.49, 1.0, 2.0))
+        cls.monster_list['Eye'].window = window
 
         cls.interaction_list = [
             FlashLight((1.8, 0.4, -3.2)),
@@ -90,11 +95,14 @@ class GAME_LOGIC:
             MimicGift((-2.3, 0.4, -0.2)),
             door,
             PissDrawer((-1.6, 0.1, 2.6)),
+            window,
         ]
 
         TEXT.replace("Inspect the room with the MOUSE.", duration=3, fade_out=0, force=True)
         TEXT.add("Move with WASD.", duration=3, fade_out=0, force=True)
         TEXT.add("Interact with LEFT CLICK.", force=True)
+
+        VISUALS.madness = 0
 
     @classmethod
     def update(cls) -> None:
@@ -144,6 +152,11 @@ class GAME_LOGIC:
             monster.draw()
 
         cls.SURFACE.fill((0, 0, 0))
+        if VISUALS.madness:
+            madness_visual.set_alpha(int(VISUALS.madness * 100))
+            effect = Surface((cls.SURFACE.get_size()))
+            effect.blit(scale(madness_visual, cls.SURFACE.get_size()), (0, 0))
+            distortion(effect, cls.SURFACE, True, True, cls.SURFACE.get_width() * 0.03, 0.01 + VISUALS.madness * 0.05, 0.03)
 
         # {"z", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
         cls.RAY_CASTER.add_light(

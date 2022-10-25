@@ -53,6 +53,11 @@ def load_static_surfaces(caster: RayCaster) -> None:
         2.501, 2.3, -0.4,
         10.5, 0., -0.4
     )
+    caster.add_surface(
+        load_image("data", "images", "textures", "black.png"),
+        2.501, 4., -0.3,
+        10.5, -2., -0.3
+    )
 
     caster.add_surface(
         load_image("data", "images", "textures", "corridor_wall.png"),

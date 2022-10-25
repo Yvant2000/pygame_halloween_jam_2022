@@ -14,6 +14,8 @@ from nostalgiaefilters import vignette, fish, distortion
 hand_visual: Surface = load_image("data", "images", "visuals", "hand.png")
 wardrobe_visual: Surface = load_image("data", "images", "visuals", "wardrobe.png")
 watcher_hand_visual: Surface = load_image("data", "images", "visuals", "watcher_hand.png")
+madness_visual: Surface = load_image("data", "images", "visuals", "madness.png")
+
 
 class VISUALS:
     vignette: float
@@ -32,6 +34,8 @@ class VISUALS:
     fried: float
     min_fried: float
 
+    madness: float
+
     @classmethod
     def reset(cls):
         cls.vignette = 0.
@@ -49,6 +53,8 @@ class VISUALS:
 
         cls.fried = 0.
         cls.min_fried = 0.
+
+        cls.madness = 0.
 
     @classmethod
     def display(cls):
@@ -69,7 +75,7 @@ class VISUALS:
 
         if cls.fried:
             effect = DISPLAY.screen.copy()
-            distortion(effect, DISPLAY.screen, True, True, cls.fried * 10, cls.fried, cls.fried)
+            distortion(effect, DISPLAY.screen, True, True, cls.fried * 20, 100, 1)
             cls.fried = max(cls.min_fried, cls.fried - DISPLAY.delta_time)
 
         if cls.distortion:
@@ -82,4 +88,3 @@ class VISUALS:
         if cls.vignette:
             vignette(DISPLAY.screen, strength=cls.vignette * 5)
             cls.vignette = max(cls.min_vignette, cls.vignette - DISPLAY.delta_time)
-

@@ -367,7 +367,36 @@ class Door(Interaction):
 
         GAME_LOGIC.RAY_CASTER.add_surface(
             self.image,
-            self.pos[0], 0.0, self.pos[2],
-            self.pos[0] - sin(radians(self.angle)) * 0.8, 2.0, self.pos[2] - cos(radians(self.angle)) * 0.8,
+            self.pos[0], 2.0, self.pos[2],
+            self.pos[0] - sin(radians(self.angle)) * 0.8, 0.0, self.pos[2] - cos(radians(self.angle)) * 0.8,
+            rm=True
+        )
+
+
+class Window(Interaction):
+    def __init__(self, pos):
+        self.image = load_image("data", "images", "props", "window.png")
+        self.pos = pos
+        self.y = 0.0
+
+    def can_interact(self, player) -> bool:
+        if not self.y:
+            return False
+
+        if player.is_looking_at((self.pos[0], self.pos[1] + self.y, self.pos[2] - 0.4), 0.4) and distance(player.pos, self.pos) < 1.5:
+            TEXT.replace("Close the window", duration=0.0, fade_out=0.3, color=(100, 100, 100))
+            return True
+        return False
+
+    def interact(self, player):
+        # TODO: add sound
+        self.y = 0
+
+    def update(self, player):
+        # TODO: play_outside_sound
+        GAME_LOGIC.RAY_CASTER.add_surface(
+            self.image,
+            self.pos[0], self.pos[1] + 0.5 + self.y, self.pos[2] - 0.8,
+            self.pos[0], self.pos[1] + self.y, self.pos[2],
             rm=True
         )
