@@ -11,9 +11,9 @@ from scripts.utils import line_point_distance, join_path
 
 class Player:
     def __init__(self):
-        self.x: float = 0
+        self.x: float = 1.0
         self.y: float = 0
-        self.z: float = 0
+        self.z: float = 2.5
 
         self.angle_x: float = 0
         self.angle_y: float = 90

@@ -81,7 +81,8 @@ class Hangman(Monster):
             self.danger_channel.set_volume(self.madness)
 
             if self.madness > 1.0:
-                GAME_OVER_SCREEN.reason = "Don't look at the hangman. Listen carefully for the rope."
+                GAME_OVER_SCREEN.reason = "Don't look at the hangman.\n" \
+                                          "Listen carefully for the rope to know when he's coming."
                 GAME_OVER_SCREEN.killer = "hangman"
                 GAME_LOGIC.game_over()
 
@@ -168,11 +169,15 @@ class Mimic(Monster):
             if distance_2d((self.x, 0.0, self.z), target) < 1.0:
                 if target == GAME_LOGIC.PLAYER.pos:
                     if GAME_LOGIC.PLAYER.in_wardrobe:
-                        GAME_OVER_SCREEN.reason = "Don't hide if you found the plushie."
+                        GAME_OVER_SCREEN.reason = "Steven was looking for his friend.\n" \
+                                                  "If you found the plushie, give it back to him, don't hide yourself."
                     elif GAME_LOGIC.PLAYER.has_teddy_bear:
-                        GAME_OVER_SCREEN.reason = "You must give back George before his friends gets angry."
+                        GAME_OVER_SCREEN.reason = "Steven was looking for his friend.\n" \
+                                                  "If you found the plushie, give it back to him as soon as possible."
                     else:
-                        GAME_OVER_SCREEN.reason = "The plushie is hidden in the room. Find it before he gets angry."
+                        GAME_OVER_SCREEN.reason = "Steven was looking for his friend.\n" \
+                                                  "The plushie is hidden in the room. Find it before he gets angry.\n" \
+                                                  "If you can't find the plushie, hide yourself in the wardrobe."
                     GAME_OVER_SCREEN.killer = "mimic"
                     GAME_LOGIC.game_over()
                 elif self.teddy_bear:
@@ -367,7 +372,9 @@ class Crawler(Monster):
                         self.timer = 20.
                         GAME_LOGIC.time_stopped = False
                     else:
-                        GAME_OVER_SCREEN.reason = "When the crawler is coming for you, get in the bed or in the wardrobe."
+                        GAME_OVER_SCREEN.reason = "The crawler is coming from under the bed.\n" \
+                                                  "Hide in the closet or get on the bed.\n" \
+                                                  "Pay attention to the sounds to know when he gets back under the bed."
                         GAME_OVER_SCREEN.killer = "crawler"
                         GAME_LOGIC.game_over()
 
@@ -461,7 +468,9 @@ class Guest(Monster):
                             return
                         if GAME_LOGIC.PLAYER.in_wardrobe:
                             if GAME_LOGIC.PLAYER.use_flashlight:
-                                GAME_OVER_SCREEN.reason = "The Guest can find you if you use the flashlight."
+                                GAME_OVER_SCREEN.reason = "The Guest saw your flashlight in the closet.\n" \
+                                                          "While you're hiding, turn off all the lights.\n" \
+                                                          "If you see him running, close the door as fast as you can."
                                 GAME_OVER_SCREEN.killer = "guest"
                                 GAME_LOGIC.game_over()
                                 return
@@ -471,7 +480,8 @@ class Guest(Monster):
                             self.running = False
                             GAME_LOGIC.time_stopped = False
                             return
-                        GAME_OVER_SCREEN.reason = "When the Guest runs towards you, close the door as fast as you can."
+                        GAME_OVER_SCREEN.reason = "When the Guest runs towards you, close the door as fast as you can.\n" \
+                                                  "He will start running if the door is open and he sees a light.\n"
                         GAME_OVER_SCREEN.killer = "guest"
                         GAME_LOGIC.game_over()
                     return
@@ -486,7 +496,9 @@ class Guest(Monster):
                     if GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light:
                         if GAME_LOGIC.PLAYER.in_wardrobe:
                             if GAME_LOGIC.PLAYER.use_flashlight:
-                                GAME_OVER_SCREEN.reason = "The Guest can find you if you use the flashlight."
+                                GAME_OVER_SCREEN.reason = "The Guest saw your flashlight in the closet.\n" \
+                                                          "While you're hiding, turn off all the lights.\n" \
+                                                          "Pay attention to the sounds to know when he leaves."
                                 GAME_OVER_SCREEN.killer = "guest"
                                 GAME_LOGIC.game_over()
                                 return
@@ -496,7 +508,10 @@ class Guest(Monster):
                             self.running = False
                             self.state = 2
                             return
-                        GAME_OVER_SCREEN.reason = "Listen if the Guest is at the door, and don't light up the room, but hide the closet."
+                        GAME_OVER_SCREEN.reason = "The Guest was waiting at your door and saw a light.\n" \
+                                                  "When you open the door, make sure you don't have any light on.\n" \
+                                                  "Listen to his breathing to know if he's here.\n" \
+                                                  "If you hear him, close the door and run to the closet.\n"
                         GAME_OVER_SCREEN.killer = "guest"
                         GAME_LOGIC.game_over()
                         return
@@ -529,7 +544,9 @@ class Guest(Monster):
                     # TODO: sound door open
                     if GAME_LOGIC.PLAYER.in_wardrobe:
                         if GAME_LOGIC.PLAYER.use_flashlight:
-                            GAME_OVER_SCREEN.reason = "The Guest can find you if you use the flashlight."
+                            GAME_OVER_SCREEN.reason = "The Guest saw your flashlight in the closet.\n" \
+                                                      "While you're hiding, turn off all the lights.\n" \
+                                                      "Pay attention to the sounds to know when he leaves."
                             GAME_OVER_SCREEN.killer = "guest"
                             GAME_LOGIC.game_over()
                             return
@@ -540,7 +557,10 @@ class Guest(Monster):
                         self.state = 2
                         GAME_LOGIC.time_stopped = False
                         return
-                    GAME_OVER_SCREEN.reason = "The Guest will try to come to your room by the door. If you hide in the closet, he won't find you."
+                    GAME_OVER_SCREEN.reason = "The Guest will try to come to your room by the door.\n" \
+                                              "If you hide in the closet, he won't find you.\n" \
+                                              "You can know if he is at the door by listening to his breathing.\n" \
+                                              "But don't light up the room while he is at the door."
                     GAME_OVER_SCREEN.killer = "guest"
                     GAME_LOGIC.game_over()
 
@@ -588,10 +608,12 @@ class Mom(Monster):
         if self.state:
             GAME_LOGIC.door_open = True
             if not GAME_LOGIC.PLAYER.in_bed:
-                GAME_OVER_SCREEN.reason = "Mom will get angry if you're not in bed."
+                GAME_OVER_SCREEN.reason = "Mom saw you were not in bed.\n" \
+                                          "When you hear her coming, turn the lights off and pretend you're sleeping."
                 self.angriness += DISPLAY.delta_time * 0.1 * (1 + self.aggressiveness / 10)
             elif GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light:
-                GAME_OVER_SCREEN.reason = "Mom will get angry if you don't turn the lights off."
+                GAME_OVER_SCREEN.reason = "Mom saw a light.\n" \
+                                          "When you hear her coming, turn the lights off and pretend you're sleeping."
                 self.angriness += DISPLAY.delta_time * 0.1 * (1 + self.aggressiveness / 10)
             else:
                 self.angriness = max(0., self.angriness - DISPLAY.delta_time * 0.1)
@@ -661,7 +683,8 @@ class Dad(Monster):
             VISUALS.fried = self.angriness + VISUALS.min_fried
 
             if self.angriness > 1.0:
-                GAME_OVER_SCREEN.reason = "Dad will get angry if you move."
+                GAME_OVER_SCREEN.reason = "Dad will get angry if you move.\n" \
+                                          "You can move your head, but don't walk or jump."
                 GAME_OVER_SCREEN.killer = "dad"
                 GAME_LOGIC.game_over()
 
@@ -704,14 +727,43 @@ class Dad(Monster):
 class Watcher(Monster):
     def __init__(self):
         super().__init__()
-        self.timer = 15.
-        self.state = 3
+        self.timer = 20.
+        self.state = 0
+        self.aggressiveness = 20
 
         self.looking_image = load_image("data", "images", "monsters", "watcher_looking.png")
         self.inside_image = load_image("data", "images", "monsters", "watcher_inside.png")
 
     def update(self):
-        ...
+        if not self.aggressiveness:
+            return
+
+        if GAME_LOGIC.time_stopped:
+            return
+
+        if self.state < 3 or GAME_LOGIC.wardrobe_open:
+            self.timer -= (
+                    DISPLAY.delta_time
+                    * (1 + self.aggressiveness / 10)
+                    * randint(1, 3) / 3
+                    * (1 + GAME_LOGIC.wardrobe_open)
+            )
+        if self.timer <= 0:
+            self.state += 1
+            match self.state:
+                case 1:
+                    self.timer = 25.
+                case 2:
+                    self.timer = 30.
+                case 3:
+                    self.timer = 10.
+                case 4:
+                    GAME_OVER_SCREEN.reason = "The Watcher will try to sneak out of the wardrobe.\n" \
+                                              "If the door is open, he will get out.\n" \
+                                              "Use your light if you see his eyes to make him leave.\n" \
+                                              "If you don't force him to leave fast enough, he will stay forever."
+                    GAME_OVER_SCREEN.killer = "watcher"
+                    GAME_LOGIC.game_over()
 
     def draw(self):
         match self.state:
@@ -727,12 +779,6 @@ class Watcher(Monster):
 
             case 2:
                 if GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.wardrobe_open:
-                    # GAME_LOGIC.RAY_CASTER.add_surface(
-                    #     self.looking_image,
-                    #     -0.0, 2.0, -3.3,
-                    #     -0.8, 0.0, -3.3,
-                    #     rm=True,
-                    # )
                     add_surface_toward_player_2d(
                         GAME_LOGIC.RAY_CASTER,
                         GAME_LOGIC.PLAYER,

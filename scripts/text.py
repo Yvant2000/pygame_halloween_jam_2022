@@ -14,9 +14,14 @@ class TextMessage:
         self.fade_out: float = fade_out
 
         font_: Font = Font(f"data/fonts/{font}.ttf", size)
-        self._surface: Surface = font_.render(text, True, color)
 
-        self.x: int = DISPLAY.screen_size[0]//2 - self._surface.get_width()//2
+        self._surfaces: list[Surface] = []
+        for line in text.split("\n"):
+            if line:
+                s = font_.render(line, True, color)
+                self._surfaces.append(s)
+                y -= s.get_height() + 2
+
         self.y: int = y
 
         self.force: bool = force
@@ -25,12 +30,20 @@ class TextMessage:
         """Display the text message on the given surface.
         return True when the text isn't displayed anymore"""
 
+        alpha = 255
         if self.duration <= 0:
             if self.duration <= -self.fade_out:
                 return True
-            self._surface.set_alpha(int((1 + self.duration / self.fade_out) * 255))
+            alpha = int((1 + self.duration / self.fade_out) * 255)
+            # self._surface.set_alpha(int((1 + self.duration / self.fade_out) * 255))
 
-        surface.blit(self._surface, (self.x, self.y))
+        y = self.y
+
+        for image in self._surfaces:
+            image.set_alpha(alpha)
+            surface.blit(image, (DISPLAY.screen_size[0]//2 - image.get_width()//2, y))
+            y += image.get_height() + 2
+
         self.duration -= DISPLAY.delta_time
 
         return False

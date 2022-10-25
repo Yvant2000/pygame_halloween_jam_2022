@@ -36,7 +36,7 @@ class GAME_LOGIC:
     @classmethod
     def reset(cls, endless: bool = False):
         from scripts.monsters import Hangman, Mimic, Crawler, Guest, Mom, Dad, Watcher
-        from scripts.interactions import BedsideLamp, Bed, FlashLight, Wardrobe, BabyPhone, MimicGift, Door, TeddyBear, PissDrawer
+        from scripts.interactions import BedsideLamp, Bed, FlashLight, Wardrobe, BabyPhone, MimicGift, Door, PissDrawer
 
         cls.ENDLESS = endless
 

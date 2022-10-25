@@ -129,6 +129,7 @@ class PissDrawer(Interaction):
     def update(self, player):
         ...
 
+
 class Bed(Interaction):
     def __init__(self, pos):
         self.pos = pos
