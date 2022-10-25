@@ -79,6 +79,8 @@ class GAME_LOGIC:
         # cls.monster_list["Crawler"].aggressiveness = 20
         # cls.monster_list["Mom"].aggressiveness = 20
         # cls.monster_list["Dad"].aggressiveness = 20
+        # cls.monster_list["Eye"].aggressiveness = 20
+        cls.monster_list['Guest'].aggressiveness = 20
 
         door = Door((2.499, 1.0, -0.6))
         cls.monster_list['Mom'].door = door

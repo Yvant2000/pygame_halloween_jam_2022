@@ -440,6 +440,8 @@ class Guest(Monster):
         self.eye_image: Surface = load_image("data", "images", "monsters", "guest_eye.png")
         self.running_image: Surface = load_image("data", "images", "monsters", "guest_running.png")
 
+        self.scream_sound: Sound = Sound(join_path("data", "sounds", "sfx", "guest_scream.ogg"))
+
     def update(self):
         if not self.aggressiveness or GAME_LOGIC.monster_list["Mom"].state:
             return
@@ -485,12 +487,11 @@ class Guest(Monster):
                         GAME_OVER_SCREEN.killer = "guest"
                         GAME_LOGIC.game_over()
                     return
-                if GAME_LOGIC.PLAYER.use_flashlight and GAME_LOGIC.door_open and not GAME_LOGIC.time_stopped:
-                    if GAME_LOGIC.PLAYER.is_looking_at((7., 1., -0.8), 1.5):
-                        if GAME_LOGIC.PLAYER.x > 1.2 and -1.6 < GAME_LOGIC.PLAYER.z < -0.4:
-                            self.running = True
-                            GAME_LOGIC.time_stopped = True
-                            return
+                if (GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light) and GAME_LOGIC.door_open and not GAME_LOGIC.time_stopped:
+                    self.running = True
+                    self.scream_sound.play()
+                    GAME_LOGIC.time_stopped = True
+                    return
             case 3:
                 if GAME_LOGIC.door_open:
                     if GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light:

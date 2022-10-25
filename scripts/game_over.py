@@ -4,6 +4,7 @@ from pygame.mixer import stop as pg_mixer_stop, Sound
 from scripts.display import DISPLAY
 from scripts.text import TEXT
 from scripts.input_handler import INPUT
+from scripts.visuals import VISUALS
 from scripts.utils import load_image, join_path
 
 
@@ -46,6 +47,8 @@ class GAME_OVER_SCREEN:
         if cls.screamer_duration > 0:
             cls.screamer_duration -= DISPLAY.delta_time
             DISPLAY.display_scaled(cls.screamer_surface)
+            VISUALS.shake = 1.0
+            VISUALS.display()
 
         if cls.alpha >= 1:
             if INPUT.confirm():

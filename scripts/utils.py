@@ -102,8 +102,8 @@ def stereo_distance(line_start: tuple[float, float, float], line_end: tuple[floa
     return (line_end[0] - line_start[0]) * (point[2] - line_start[2]) - (line_end[2] - line_start[2]) * (point[0] - line_start[0])
 
 
-def set_stereo_volume(player, sound_pos, channel, hear_distance: float = 7., hear_stereo_distance: float = 3.):
-    volume: float = max(0., 1. - distance(player.pos, sound_pos) / hear_distance)
+def set_stereo_volume(player, sound_pos, channel, hear_distance: float = 7., hear_stereo_distance: float = 3., volume: float = 1.0):
+    volume: float = max(0., volume - distance(player.pos, sound_pos) / hear_distance)
     stereo_dist = max(-1., min(1., stereo_distance(
         player.pos,
         (player.pos[0] + player.look_direction[0], player.pos[1] + player.look_direction[1], player.pos[2] + player.look_direction[2]),

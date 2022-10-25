@@ -73,7 +73,7 @@ class BedsideLamp(Interaction):
     def __init__(self, pos):
         self.pos: tuple[float, float, float] = pos
         self.light: bool = False
-        self.click_sound: Sound = Sound(join_path("data", "sounds", "sfx", "click.ogg"))
+        self.click_sound: Sound = Sound(join_path("data", "sounds", "sfx", "bedlight.ogg"))
         self.image_off: Surface = load_image("data", "images", "props", "bedsidelight_off.png")
         self.image_on: Surface = load_image("data", "images", "props", "bedsidelight_on.png")
 
@@ -115,6 +115,7 @@ class BedsideLamp(Interaction):
 class PissDrawer(Interaction):
     def __init__(self, pos):
         self.pos = pos
+        self.sound: Sound = Sound(join_path("data", "sounds", "sfx", "white_noise_hit.ogg"))
 
     def can_interact(self, player) -> bool:
         if player.is_looking_at(self.pos, 0.4) and distance(player.pos, self.pos) < 1.45:
@@ -123,6 +124,7 @@ class PissDrawer(Interaction):
         return False
 
     def interact(self, player):
+        self.sound.play()
         GAME_LOGIC.interaction_list.remove(self)
         VISUALS.fried = 1.5
 
@@ -295,6 +297,10 @@ class TeddyBear(Interaction):
             (0, 0, 0),
         ))
         self.image: Surface = load_image("data", "images", "props", "teddy_bear.png")
+        self.sound: Sound = Sound(join_path("data", "sounds", "sfx", "plush_lost.ogg"))
+        self.channel: Channel = Channel(3)
+        set_stereo_volume(GAME_LOGIC.PLAYER, self.pos, self.channel)
+        self.channel.play(self.sound)
 
     def can_interact(self, player) -> bool:
         if player.is_looking_at(self.pos, 0.7) and distance(player.pos, self.pos) < 1.8:
@@ -328,6 +334,7 @@ class TeddyBear(Interaction):
 class MimicGift(Interaction):
     def __init__(self, pos):
         self.pos = pos
+        self.sound: Sound = Sound(join_path("data", "sounds", "sfx", "plush_found.ogg"))
 
     def can_interact(self, player) -> bool:
         if player.has_teddy_bear and player.is_looking_at(self.pos, 0.7) and distance(player.pos, self.pos) < 2.5:
@@ -337,6 +344,7 @@ class MimicGift(Interaction):
 
     def interact(self, player):
         player.has_teddy_bear = False
+        self.sound.play()
         GAME_LOGIC.monster_list['Mimic'].calm()  # type: ignore
 
     def update(self, player):
@@ -348,6 +356,10 @@ class Door(Interaction):
         self.image: Surface = load_image("data", "images", "props", "door.png")
         self.pos = pos
         self.angle: float = 0
+
+        self.open_sound: Sound = Sound(join_path("data", "sounds", "sfx", "door_open.ogg"))
+        self.close_sound: Sound = Sound(join_path("data", "sounds", "sfx", "door_close.ogg"))
+        self.open_end_sound: Sound = Sound(join_path("data", "sounds", "sfx", "door_open_end.ogg"))
 
     def can_interact(self, player) -> bool:
         if player.is_looking_at((self.pos[0] - sin(radians(self.angle)) * 0.4, self.pos[1], self.pos[2] - cos(radians(self.angle)) * 0.4), 0.4) and distance(player.pos, self.pos) < 2.0:
@@ -361,9 +373,16 @@ class Door(Interaction):
     def update(self, player):
 
         if GAME_LOGIC.door_open:
-            self.angle = min(90., self.angle + DISPLAY.delta_time * 110)
-        else:
-            self.angle = max(0., self.angle - DISPLAY.delta_time * 110)
+            if self.angle != 90:
+                if self.angle == 0:
+                    self.open_sound.play()
+                self.angle = min(90., self.angle + DISPLAY.delta_time * 150)
+                if self.angle == 90:
+                    self.open_end_sound.play()
+        elif self.angle != 0:
+            self.angle = max(0., self.angle - DISPLAY.delta_time * 180)
+            if self.angle == 0:
+                self.close_sound.play()
 
         GAME_LOGIC.RAY_CASTER.add_surface(
             self.image,
@@ -378,6 +397,13 @@ class Window(Interaction):
         self.image = load_image("data", "images", "props", "window.png")
         self.pos = pos
         self.y = 0.0
+        self.close: bool = False
+        self.close_sound: Sound = Sound(join_path("data", "sounds", "sfx", "window_close.ogg"))
+        self.wind_sound: Sound = Sound(join_path("data", "sounds", "sfx", "wind_and_crickets.ogg"))
+
+        self.channel: Channel = Channel(4)
+        set_stereo_volume(GAME_LOGIC.PLAYER, self.pos, self.channel, volume=0.0)
+        self.channel.play(self.wind_sound, loops=-1)
 
     def can_interact(self, player) -> bool:
         if not self.y:
@@ -389,11 +415,17 @@ class Window(Interaction):
         return False
 
     def interact(self, player):
-        # TODO: add sound
-        self.y = 0
+        self.close = True
 
     def update(self, player):
-        # TODO: play_outside_sound
+
+        if self.close:
+            self.y = max(0., self.y - DISPLAY.delta_time * 1.5)
+            if not self.y:
+                self.close = False
+                self.close_sound.play()
+        set_stereo_volume(player, self.pos, self.channel, volume=self.y * 2.3, hear_distance=9.)
+
         GAME_LOGIC.RAY_CASTER.add_surface(
             self.image,
             self.pos[0], self.pos[1] + 0.5 + self.y, self.pos[2] - 0.8,
