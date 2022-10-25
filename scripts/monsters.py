@@ -430,9 +430,7 @@ class Guest(Monster):
         self.running_image: Surface = load_image("data", "images", "monsters", "guest_running.png")
 
     def update(self):
-        print(self.state)
-
-        if not self.aggressiveness:
+        if not self.aggressiveness or GAME_LOGIC.monster_list["Mom"].state:
             return
 
         match self.state:
@@ -453,6 +451,7 @@ class Guest(Monster):
                         if not GAME_LOGIC.door_open:
                             # TODO: sound hurt the door
                             self.state = 1
+                            GAME_LOGIC.time_stopped = False
                             self.x = 1.0
                             self.timer = 20.
                             return
@@ -466,6 +465,7 @@ class Guest(Monster):
                             self.timer = 20.
                             self.x = 4.5
                             self.running = False
+                            GAME_LOGIC.time_stopped = False
                             return
                         GAME_OVER_SCREEN.reason = "When the Guest runs towards you, close the door as fast as you can."
                         GAME_OVER_SCREEN.killer = "guest"
@@ -475,6 +475,7 @@ class Guest(Monster):
                     if GAME_LOGIC.PLAYER.is_looking_at((7., 1., -0.8), 1.5):
                         if GAME_LOGIC.PLAYER.x > 1.2 and -1.6 < GAME_LOGIC.PLAYER.z < -0.4:
                             self.running = True
+                            GAME_LOGIC.time_stopped = True
                             return
             case 3:
                 if GAME_LOGIC.door_open:
@@ -540,7 +541,7 @@ class Guest(Monster):
                     GAME_LOGIC.game_over()
 
     def draw(self):
-        if not self.aggressiveness or not self.state:
+        if (not self.aggressiveness or not self.state) or GAME_LOGIC.monster_list["Mom"].state:
             return
 
         match self.state:
@@ -566,3 +567,69 @@ class Guest(Monster):
                         7.0, 0.0, -1.4,
                         rm=True,
                     )
+
+
+class Mom(Monster):
+    def __init__(self):
+        super().__init__()
+        self.door = None
+        self.state = False
+        self.timer = 50.
+        self.angriness: float = 0.
+
+    def update(self):
+        if not self.aggressiveness:
+            return
+
+        if self.state:
+            GAME_LOGIC.door_open = True
+            if not GAME_LOGIC.PLAYER.in_bed:
+                GAME_OVER_SCREEN.reason = "Mom will get angry if you're not in bed."
+                self.angriness += DISPLAY.delta_time * 0.1 * (1 + self.aggressiveness / 10)
+            elif GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light:
+                GAME_OVER_SCREEN.reason = "Mom will get angry if you don't turn the lights off."
+                self.angriness += DISPLAY.delta_time * 0.1 * (1 + self.aggressiveness / 10)
+            else:
+                self.angriness = max(0., self.angriness - DISPLAY.delta_time * 0.1)
+
+            VISUALS.fish_eye = self.angriness
+            VISUALS.vignette = self.angriness
+
+            if self.angriness > 1.0:
+                GAME_OVER_SCREEN.killer = "mom"
+                GAME_LOGIC.game_over()
+
+            self.timer -= DISPLAY.delta_time
+
+        if self.timer <= 0:
+            self.state = not self.state
+            if self.state:
+                GAME_LOGIC.time_stopped = True
+                self.angriness = 0.
+                self.timer = 10.
+                self.door.angle = 90.
+                # TODO: sound door open
+                # TODO: sound mom
+                # TODO: sound light
+            else:
+                GAME_LOGIC.time_stopped = False
+                self.timer = 50.
+                # TODO: sound light off
+
+        if GAME_LOGIC.time_stopped:
+            return
+
+        self.timer -= (
+                DISPLAY.delta_time
+                * (1 + self.aggressiveness / 10)
+                * randint(1, 3) / 3
+        )
+
+    def draw(self):
+        if self.state:
+            GAME_LOGIC.RAY_CASTER.add_light(
+                2.5, 2.0, -1.0,
+                5.0,
+                1.0, 1.0, 0.0,
+                -2.5, 0.0, -1.0,
+            )

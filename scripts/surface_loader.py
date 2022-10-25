@@ -161,9 +161,9 @@ def load_static_surfaces(caster: RayCaster) -> None:
 
     caster.add_surface(
         load_image("data", "images", "props", "closet_top.png"),
-        -2.3, 1.1, 2.2,
-        -1.0, 1.1, 3.5,
-        -1.0, 1.1, 2.2,
+        -2.3, 1.09, 2.2,
+        -1.0, 1.09, 3.5,
+        -1.0, 1.09, 2.2,
     )
 
     # LITTLE TABLE

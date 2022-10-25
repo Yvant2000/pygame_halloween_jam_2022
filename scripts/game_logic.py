@@ -34,7 +34,7 @@ class GAME_LOGIC:
 
     @classmethod
     def reset(cls, endless: bool = False):
-        from scripts.monsters import Hangman, Mimic, Crawler, Guest
+        from scripts.monsters import Hangman, Mimic, Crawler, Guest, Mom
         from scripts.interactions import BedsideLamp, Bed, FlashLight, Wardrobe, BabyPhone, MimicGift, Door
 
         cls.ENDLESS = endless
@@ -44,7 +44,7 @@ class GAME_LOGIC:
 
         cls.PLAYER = Player()
         cls.RAY_CASTER = RayCaster()
-        cls.SURFACE = Surface((128*3, 72*3))  # 16:9
+        cls.SURFACE = Surface((128*1, 72*1))  # 16:9
 
         load_static_surfaces(cls.RAY_CASTER)
 
@@ -54,6 +54,25 @@ class GAME_LOGIC:
 
         cls.door_open = False
 
+        cls.monster_list = {
+            "Hangman": Hangman(),
+            "Mimic": Mimic(),
+            "Crawler": Crawler(),
+            "Guest": Guest(),
+            "Mom": Mom(),
+        }
+        # cls.monster_list["Hangman"].aggressiveness = 20
+        # cls.monster_list["Mimic"].aggressiveness = 20
+        # cls.monster_list["Crawler"].aggressiveness = 20
+
+        cls.monster_list["Mom"].aggressiveness = 20
+
+        TEXT.replace("Inspect the room.", duration=3, fade_out=0, force=True)
+        TEXT.add("Move with WASD.", duration=3, fade_out=0, force=True)
+        TEXT.add("Interact with LEFT CLICK.", force=True)
+
+        door = Door((2.499, 1.0, -0.6))
+        cls.monster_list['Mom'].door = door
         cls.interaction_list = [
             FlashLight((1.8, 0.4, -3.2)),
             BedsideLamp((1.3, 0.5, 3.2)),
@@ -61,22 +80,8 @@ class GAME_LOGIC:
             Wardrobe((0, 1, -3.21), (-0.4, 1, -3.5)),
             BabyPhone((-1.5, 1.1, 2.7)),
             MimicGift((-2.3, 0.4, -0.2)),
-            Door((2.499, 1.0, -0.6)),
+            door,
         ]
-
-        cls.monster_list = {
-            "Hangman": Hangman(),
-            "Mimic": Mimic(),
-            "Crawler": Crawler(),
-            "Guest": Guest(),
-        }
-        # cls.monster_list["Hangman"].aggressiveness = 20
-        # cls.monster_list["Mimic"].aggressiveness = 20
-        # cls.monster_list["Crawler"].aggressiveness = 20
-
-        TEXT.replace("Inspect the room.", duration=3, fade_out=0, force=True)
-        TEXT.add("Move with WASD.", duration=3, fade_out=0, force=True)
-        TEXT.add("Interact with LEFT CLICK.", force=True)
 
     @classmethod
     def update(cls) -> None:
