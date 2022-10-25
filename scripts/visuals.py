@@ -13,7 +13,7 @@ from nostalgiaefilters import vignette, fish, distortion
 
 hand_visual: Surface = load_image("data", "images", "visuals", "hand.png")
 wardrobe_visual: Surface = load_image("data", "images", "visuals", "wardrobe.png")
-
+watcher_hand_visual: Surface = load_image("data", "images", "visuals", "watcher_hand.png")
 
 class VISUALS:
     vignette: float

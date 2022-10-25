@@ -729,34 +729,79 @@ class Watcher(Monster):
         super().__init__()
         self.timer = 20.
         self.state = 0
-        self.aggressiveness = 20
+        self.fear: float = 0.
 
         self.looking_image = load_image("data", "images", "monsters", "watcher_looking.png")
         self.inside_image = load_image("data", "images", "monsters", "watcher_inside.png")
 
     def update(self):
-        if not self.aggressiveness:
+        if not self.aggressiveness or GAME_LOGIC.watcher_caught:
             return
 
         if GAME_LOGIC.time_stopped:
             return
 
+        if self.state == 1 or self.state == 2:
+            if GAME_LOGIC.PLAYER.in_wardrobe:
+                # TODO: play breath sound
+                ...
+            else:
+                pos = (-1.2, 1.4, -3.37) if self.state == 1 else (-0.4, 1.4, -3.37)
+                if GAME_LOGIC.PLAYER.use_flashlight and GAME_LOGIC.PLAYER.is_looking_at(pos, 0.6) and distance_2d(GAME_LOGIC.PLAYER.pos, pos) < 3.0:
+                    self.fear += DISPLAY.delta_time * (1 - 0.5 * (self.state == 2))
+                    VISUALS.shake += 1.5 * DISPLAY.delta_time
+                    VISUALS.distortion += 1.5 * DISPLAY.delta_time
+                    #TODO: sound watcher scared
+                    if self.fear >= 1.0:
+                        self.state = 0
+                        self.timer = 20.
+                    return
+                else:
+                    self.fear = max(0., self.fear - DISPLAY.delta_time)
+        elif self.state == 3:
+            if GAME_LOGIC.PLAYER.in_wardrobe:
+                GAME_LOGIC.watcher_caught = True
+                GAME_LOGIC.time_stopped = True
+                GAME_OVER_SCREEN.reason = "You went to the wardrobe with the watcher inside.\n" \
+                                          "Use your light if you see his eyes to make him leave.\n" \
+                                          "If you don't force him to leave fast enough, he will stay forever."
+                GAME_OVER_SCREEN.killer = "watcher_hands"
+                return
+
         if self.state < 3 or GAME_LOGIC.wardrobe_open:
             self.timer -= (
                     DISPLAY.delta_time
                     * (1 + self.aggressiveness / 10)
-                    * randint(1, 3) / 3
+                    * randint(1, 4) / 4
                     * (1 + GAME_LOGIC.wardrobe_open)
             )
+        elif self.state == 3:
+            self.timer = 10.
+            return
+
         if self.timer <= 0:
             self.state += 1
             match self.state:
                 case 1:
+                    self.fear = 0.
                     self.timer = 25.
+                    #TODO: sound watcher moving
                 case 2:
                     self.timer = 30.
+                    self.fear = 0.
+                    #TODO: sound watcher moving
                 case 3:
+                    #TODO: sound watcher moving
                     self.timer = 10.
+                    if GAME_LOGIC.PLAYER.in_wardrobe:
+                        GAME_LOGIC.watcher_caught = True
+                        GAME_LOGIC.time_stopped = True
+                        GAME_OVER_SCREEN.reason = "The watcher caught you in the wardrobe.\n" \
+                                                  "Leave the wardrobe if you hear his breath.\n" \
+                                                  "Use your light if you see his eyes to make him leave.\n" \
+                                                  "If you don't force him to leave fast enough, he will stay forever."
+                        GAME_OVER_SCREEN.killer = "watcher_hands"
+                        return
                 case 4:
                     GAME_OVER_SCREEN.reason = "The Watcher will try to sneak out of the wardrobe.\n" \
                                               "If the door is open, he will get out.\n" \
@@ -764,6 +809,7 @@ class Watcher(Monster):
                                               "If you don't force him to leave fast enough, he will stay forever."
                     GAME_OVER_SCREEN.killer = "watcher"
                     GAME_LOGIC.game_over()
+                    return
 
     def draw(self):
         match self.state:

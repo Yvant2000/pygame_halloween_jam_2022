@@ -1,5 +1,5 @@
 from pygame import Surface
-from pygame.transform import scale
+from pygame.transform import scale, flip
 
 from scripts.player_controler import Player
 from scripts.display import DISPLAY
@@ -7,7 +7,7 @@ from scripts.text import TEXT
 from scripts.input_handler import INPUT
 from scripts.game_over import GAME_OVER_SCREEN
 from scripts.surface_loader import load_static_surfaces
-from scripts.visuals import hand_visual, VISUALS, wardrobe_visual
+from scripts.visuals import hand_visual, VISUALS, wardrobe_visual, watcher_hand_visual
 from scripts.utils import GameState
 
 
@@ -33,6 +33,9 @@ class GAME_LOGIC:
     door_open: bool
     wardrobe_open: bool
 
+    watcher_caught: bool
+    watcher_hands: float
+
     @classmethod
     def reset(cls, endless: bool = False):
         from scripts.monsters import Hangman, Mimic, Crawler, Guest, Mom, Dad, Watcher
@@ -55,6 +58,9 @@ class GAME_LOGIC:
 
         cls.door_open = False
         cls.wardrobe_open = False
+
+        cls.watcher_caught = False
+        cls.watcher_hands = -3.0
 
         cls.monster_list = {
             "Hangman": Hangman(),
@@ -165,7 +171,7 @@ class GAME_LOGIC:
                 DISPLAY.FOV,
                 DISPLAY.VIEW_DISTANCE,
             )
-        elif cls.PLAYER.in_wardrobe:
+        elif cls.PLAYER.in_wardrobe or cls.watcher_caught:
             if cls.PLAYER.use_flashlight:
                 cls.RAY_CASTER.add_light(
                     -0.4, cls.PLAYER.height, -3.3,
@@ -178,7 +184,7 @@ class GAME_LOGIC:
 
             cls.RAY_CASTER.raycasting(
                 cls.SURFACE,
-                -0.4, cls.PLAYER.height, -3.4,
+                -0.4, cls.PLAYER.height, -3.4 - max(0., cls.watcher_hands * 0.3),
                 0,
                 90,
                 DISPLAY.FOV,
@@ -186,7 +192,19 @@ class GAME_LOGIC:
             )
 
             cls.SURFACE.blit(scale(wardrobe_visual, cls.SURFACE.get_size()), (0, 0))
+            if cls.watcher_caught:
+                cls.PLAYER.in_wardrobe = True
 
+                h = cls.SURFACE.get_height()
+                nw = watcher_hand_visual.get_width() * h / watcher_hand_visual.get_height()
+                surf = scale(watcher_hand_visual, (nw, h))
+
+                w = cls.SURFACE.get_width()
+                cls.SURFACE.blit(surf, (cls.watcher_hands * 0.7 * w - nw, 0))
+                cls.SURFACE.blit(flip(surf, True, False), (w - cls.watcher_hands * 0.7 * w, 0))
+                if cls.watcher_hands >= 1.0:
+                    cls.game_over()
+                cls.watcher_hands += DISPLAY.delta_time * 3.0
         else:
             if cls.PLAYER.use_flashlight:
                 cls.RAY_CASTER.add_light(

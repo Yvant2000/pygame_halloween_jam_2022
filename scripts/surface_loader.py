@@ -49,15 +49,15 @@ def load_static_surfaces(caster: RayCaster) -> None:
     from scripts.utils import repeat_texture
 
     caster.add_surface(
-        repeat_texture(load_image("data", "images", "textures", "wall_texture.png"), 8, 3),
+        load_image("data", "images", "textures", "corridor_wall.png"),
         2.501, 2.3, -0.4,
         10.5, 0., -0.4
     )
 
     caster.add_surface(
-        repeat_texture(load_image("data", "images", "textures", "wall_texture.png"), 8, 3),
-        10.5, 2.3, -1.6,
-        2.501, 0., -1.6
+        load_image("data", "images", "textures", "corridor_wall.png"),
+        2.501, 2.3, -1.6,
+        10.5, 0., -1.6
     )
 
     caster.add_surface(
@@ -68,10 +68,10 @@ def load_static_surfaces(caster: RayCaster) -> None:
     )
 
     caster.add_surface(
-        repeat_texture(load_image("data", "images", "textures", "ceiling_texture.png"), 2, 8),
-        2.51, 2.3, -0.39,
-        10.5, 2.3, -1.61,
+        load_image("data", "images", "textures", "corridor_ceiling.png"),
         10.5, 2.3, -0.39,
+        2.51, 2.3, -1.61,
+        2.51, 2.3, -0.39,
     )
 
     # BED
