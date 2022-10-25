@@ -36,7 +36,7 @@ class GAME_LOGIC:
     @classmethod
     def reset(cls, endless: bool = False):
         from scripts.monsters import Hangman, Mimic, Crawler, Guest, Mom, Dad, Watcher
-        from scripts.interactions import BedsideLamp, Bed, FlashLight, Wardrobe, BabyPhone, MimicGift, Door, TeddyBear
+        from scripts.interactions import BedsideLamp, Bed, FlashLight, Wardrobe, BabyPhone, MimicGift, Door, TeddyBear, PissDrawer
 
         cls.ENDLESS = endless
 
@@ -83,6 +83,7 @@ class GAME_LOGIC:
             BabyPhone((-1.5, 1.1, 2.7)),
             MimicGift((-2.3, 0.4, -0.2)),
             door,
+            PissDrawer((-1.6, 0.1, 2.6)),
         ]
 
         TEXT.replace("Inspect the room with the MOUSE.", duration=3, fade_out=0, force=True)

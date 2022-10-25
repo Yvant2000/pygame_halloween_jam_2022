@@ -112,6 +112,23 @@ class BedsideLamp(Interaction):
         )
 
 
+class PissDrawer(Interaction):
+    def __init__(self, pos):
+        self.pos = pos
+
+    def can_interact(self, player) -> bool:
+        if player.is_looking_at(self.pos, 0.4) and distance(player.pos, self.pos) < 1.45:
+            TEXT.replace("Open piss drawer", duration=0.0, fade_out=0.3, color=(150, 150, 20))
+            return True
+        return False
+
+    def interact(self, player):
+        GAME_LOGIC.interaction_list.remove(self)
+        VISUALS.fried = 1.5
+
+    def update(self, player):
+        ...
+
 class Bed(Interaction):
     def __init__(self, pos):
         self.pos = pos
@@ -353,4 +370,3 @@ class Door(Interaction):
             self.pos[0] - sin(radians(self.angle)) * 0.8, 2.0, self.pos[2] - cos(radians(self.angle)) * 0.8,
             rm=True
         )
-        
