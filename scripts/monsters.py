@@ -126,8 +126,11 @@ class Mimic(Monster):
         super().__init__()
 
         self.front_image: Surface = load_image("data", "images", "props", "chest_front.png")
-        self.side_image: Surface = load_image("data", "images", "props", "chest_side.png")
-        self.top_image: Surface = load_image("data", "images", "props", "chest_top.png")
+        self.left_image: Surface = load_image("data", "images", "props", "chest_left.png")
+        self.right_image: Surface = load_image("data", "images", "props", "chest_right.png")
+        self.top_image1: Surface = load_image("data", "images", "props", "chest_top1.png")
+        self.top_image2: Surface = load_image("data", "images", "props", "chest_top2.png")
+        self.top_image3: Surface = load_image("data", "images", "props", "chest_top3.png")
 
         self.monster_image: Surface = load_image("data", "images", "monsters", "mimic.png")
 
@@ -254,19 +257,19 @@ class Mimic(Monster):
             rm=True,
         )
         GAME_LOGIC.RAY_CASTER.add_surface(
-            self.side_image,
+            self.left_image,
             -2.5 + self.x, 0.6, -0.95 + self.z,
             -1.9 + self.x, 0.0, -0.95 + self.z,
             rm=True,
         )
         GAME_LOGIC.RAY_CASTER.add_surface(
-            self.side_image,
+            self.right_image,
             -2.5 + self.x, 0.6, 0.35 + self.z,
             -1.9 + self.x, 0.0, 0.35 + self.z,
             rm=True,
         )
         GAME_LOGIC.RAY_CASTER.add_surface(
-            self.top_image,
+            self.top_image2,
             -2.31 + self.x, 0.6, -0.95 + self.z,
             -2.09 + self.x, 0.6, 0.35 + self.z,
             -2.09 + self.x, 0.6, -0.95 + self.z,
@@ -274,7 +277,7 @@ class Mimic(Monster):
         )
 
         GAME_LOGIC.RAY_CASTER.add_surface(
-            self.top_image,
+            self.top_image3,
             -2.1 + self.x, 0.6, -0.95 + self.z,
             -1.89 + self.x, 0.4, 0.35 + self.z,
             -1.89 + self.x, 0.4, -0.95 + self.z,
@@ -282,7 +285,7 @@ class Mimic(Monster):
         )
 
         GAME_LOGIC.RAY_CASTER.add_surface(
-            self.top_image,
+            self.top_image1,
             -2.3 + self.x, 0.6, -0.95 + self.z,
             -2.5 + self.x, 0.4, 0.35 + self.z,
             -2.5 + self.x, 0.4, -0.95 + self.z,

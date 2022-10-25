@@ -44,7 +44,7 @@ class GAME_LOGIC:
 
         cls.PLAYER = Player()
         cls.RAY_CASTER = RayCaster()
-        cls.SURFACE = Surface((128*1, 72*1))  # 16:9
+        cls.SURFACE = Surface((128*3, 72*3))  # 16:9
 
         load_static_surfaces(cls.RAY_CASTER)
 
@@ -64,8 +64,7 @@ class GAME_LOGIC:
         # cls.monster_list["Hangman"].aggressiveness = 20
         # cls.monster_list["Mimic"].aggressiveness = 20
         # cls.monster_list["Crawler"].aggressiveness = 20
-
-        cls.monster_list["Mom"].aggressiveness = 20
+        # cls.monster_list["Mom"].aggressiveness = 20
 
         TEXT.replace("Inspect the room.", duration=3, fade_out=0, force=True)
         TEXT.add("Move with WASD.", duration=3, fade_out=0, force=True)
