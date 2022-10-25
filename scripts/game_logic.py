@@ -31,11 +31,12 @@ class GAME_LOGIC:
     ENDLESS: bool
 
     door_open: bool
+    wardrobe_open: bool
 
     @classmethod
     def reset(cls, endless: bool = False):
-        from scripts.monsters import Hangman, Mimic, Crawler, Guest, Mom, Dad
-        from scripts.interactions import BedsideLamp, Bed, FlashLight, Wardrobe, BabyPhone, MimicGift, Door
+        from scripts.monsters import Hangman, Mimic, Crawler, Guest, Mom, Dad, Watcher
+        from scripts.interactions import BedsideLamp, Bed, FlashLight, Wardrobe, BabyPhone, MimicGift, Door, TeddyBear
 
         cls.ENDLESS = endless
 
@@ -53,6 +54,7 @@ class GAME_LOGIC:
         cls.time_stopped = False
 
         cls.door_open = False
+        cls.wardrobe_open = False
 
         cls.monster_list = {
             "Hangman": Hangman(),
@@ -61,6 +63,7 @@ class GAME_LOGIC:
             "Guest": Guest(),
             "Mom": Mom(),
             "Dad": Dad(),
+            "Watcher": Watcher(),
         }
         # cls.monster_list["Hangman"].aggressiveness = 20
         # cls.monster_list["Mimic"].aggressiveness = 20

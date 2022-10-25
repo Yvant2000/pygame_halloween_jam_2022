@@ -61,7 +61,7 @@ def load_static_surfaces(caster: RayCaster) -> None:
     )
 
     caster.add_surface(
-        repeat_texture(load_image("data", "images", "textures", "ground_texture.png"), 2, 8),
+        load_image("data", "images", "textures", "corridor_ground.png"),
         10.5, -0.01, -0.39,
         2.5, -0.01, -1.61,
         2.5, -0.01, -0.39,
@@ -189,5 +189,3 @@ def load_static_surfaces(caster: RayCaster) -> None:
         1.4, 0.65, -3.3,
         1.1, 0.4, -3.2,
         1.4, 0.4, -3.2)
-
-

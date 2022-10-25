@@ -163,7 +163,6 @@ class FlashLight(Interaction):
 
 class Wardrobe(Interaction):
     def __init__(self, door_pos, enter_pos):
-        self.opening: bool = False
         self.enter_pos = enter_pos
         self.door_pos = door_pos
 
@@ -174,24 +173,24 @@ class Wardrobe(Interaction):
 
     def can_interact(self, player) -> bool:
         if player.is_looking_at((self.door_pos[0] - self.x - 0.4, *(self.door_pos[1:])), 0.5) and distance(player.pos, self.door_pos) < 2.0:
-            TEXT.replace("Close the wardrobe" if self.opening else "Open the wardrobe", duration=0.0, fade_out=0.3, color=(100, 100, 100))
+            TEXT.replace("Close the wardrobe" if GAME_LOGIC.wardrobe_open else "Open the wardrobe", duration=0.0, fade_out=0.3, color=(100, 100, 100))
             return True
 
-        if self.opening and player.is_looking_at(self.enter_pos, 0.8) and distance(player.pos, self.door_pos) < 1.2:
+        if GAME_LOGIC.wardrobe_open and player.is_looking_at(self.enter_pos, 0.8) and distance(player.pos, self.door_pos) < 1.2:
             TEXT.replace("Enter the wardrobe", duration=0.0, fade_out=0.3, color=(100, 100, 100))
             return True
         return False
 
     def interact(self, player):
         if player.is_looking_at((self.door_pos[0] - self.x - 0.4, *(self.door_pos[1:])), 0.5) and distance(player.pos, self.door_pos) < 2.0:
-            self.opening = not self.opening
+            GAME_LOGIC.wardrobe_open = not GAME_LOGIC.wardrobe_open
             self.sound.stop()
             self.sound.play()
         else:
             player.in_wardrobe = True
 
     def update(self, player):
-        if self.opening:
+        if GAME_LOGIC.wardrobe_open:
             self.x = min(0.70, self.x + 1.2 * DISPLAY.delta_time)
         else:
             self.x = max(0., self.x - 1.2 * DISPLAY.delta_time)
@@ -272,7 +271,7 @@ class TeddyBear(Interaction):
             (-2.26, 0.0, 2.2),
             (-2.0, 1.1, 2.4),
             (2.0, 0.0, 3.3),
-            (1.3, 0.0, -3.3),
+            (1.3, -0.1, -3.18),
             (-2.0, 0.0, -3.3),
             (2.3, 0.0, -3.3),
             (0, 0, 0),
@@ -280,7 +279,7 @@ class TeddyBear(Interaction):
         self.image: Surface = load_image("data", "images", "props", "teddy_bear.png")
 
     def can_interact(self, player) -> bool:
-        if player.is_looking_at(self.pos, 0.6) and distance(player.pos, self.pos) < 1.5:
+        if player.is_looking_at(self.pos, 0.7) and distance(player.pos, self.pos) < 1.8:
             TEXT.replace("Pick up George", duration=0.0, fade_out=0.3, color=(100, 100, 100))
             return True
         return False
@@ -354,3 +353,4 @@ class Door(Interaction):
             self.pos[0] - sin(radians(self.angle)) * 0.8, 2.0, self.pos[2] - cos(radians(self.angle)) * 0.8,
             rm=True
         )
+        

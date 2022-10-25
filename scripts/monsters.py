@@ -191,7 +191,7 @@ class Mimic(Monster):
                 case 1:
                     self.timer = 10.
                     self.teddy_bear = TeddyBear()
-                    GAME_LOGIC.interaction_list.append(self.teddy_bear)
+                    GAME_LOGIC.interaction_list.insert(0, self.teddy_bear)
                 case 2:
                     self.timer = 10.
                 case 3:
@@ -475,7 +475,7 @@ class Guest(Monster):
                         GAME_OVER_SCREEN.killer = "guest"
                         GAME_LOGIC.game_over()
                     return
-                if GAME_LOGIC.PLAYER.use_flashlight and GAME_LOGIC.door_open:
+                if GAME_LOGIC.PLAYER.use_flashlight and GAME_LOGIC.door_open and not GAME_LOGIC.time_stopped:
                     if GAME_LOGIC.PLAYER.is_looking_at((7., 1., -0.8), 1.5):
                         if GAME_LOGIC.PLAYER.x > 1.2 and -1.6 < GAME_LOGIC.PLAYER.z < -0.4:
                             self.running = True
@@ -700,3 +700,60 @@ class Dad(Monster):
                 -2.5, 0.0, -1.0,
             )
 
+
+class Watcher(Monster):
+    def __init__(self):
+        super().__init__()
+        self.timer = 15.
+        self.state = 3
+
+        self.looking_image = load_image("data", "images", "monsters", "watcher_looking.png")
+        self.inside_image = load_image("data", "images", "monsters", "watcher_inside.png")
+
+    def update(self):
+        ...
+
+    def draw(self):
+        match self.state:
+            case 1:
+                if GAME_LOGIC.PLAYER.use_flashlight:
+                    add_surface_toward_player_2d(
+                        GAME_LOGIC.RAY_CASTER,
+                        GAME_LOGIC.PLAYER,
+                        self.looking_image,
+                        (-1.2, 0.0, -3.37),
+                        0.8, 2.0
+                    )
+
+            case 2:
+                if GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.wardrobe_open:
+                    # GAME_LOGIC.RAY_CASTER.add_surface(
+                    #     self.looking_image,
+                    #     -0.0, 2.0, -3.3,
+                    #     -0.8, 0.0, -3.3,
+                    #     rm=True,
+                    # )
+                    add_surface_toward_player_2d(
+                        GAME_LOGIC.RAY_CASTER,
+                        GAME_LOGIC.PLAYER,
+                        self.looking_image,
+                        (-0.4, 0.0, -3.37),
+                        0.8, 2.0
+                    )
+
+            case 3:
+                if GAME_LOGIC.wardrobe_open and GAME_LOGIC.PLAYER.use_flashlight:
+                    GAME_LOGIC.RAY_CASTER.add_surface(
+                        self.inside_image,
+                        -0.0, 2.0, -3.45,
+                        -0.8, 0.0, -3.45,
+                        rm=True,
+                    )
+                else:
+                    add_surface_toward_player_2d(
+                        GAME_LOGIC.RAY_CASTER,
+                        GAME_LOGIC.PLAYER,
+                        self.looking_image,
+                        (-0.4, 0.0, -3.37),
+                        0.8, 2.0
+                    )
