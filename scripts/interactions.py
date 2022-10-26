@@ -231,6 +231,7 @@ class BabyPhone(Interaction):
 
         self.channel: Channel = Channel(1)
         self.default_sound: Sound = Sound(join_path("data", "sounds", "sfx", "white_noise.ogg"))
+        self.stopped_time: bool = False
 
     def can_interact(self, player) -> bool:
         if self.channel.get_busy():
@@ -246,7 +247,95 @@ class BabyPhone(Interaction):
             return self.channel.play(self.default_sound, loops=1)
 
         GAME_LOGIC.phone_alert = False
-        # TODO
+        self.stopped_time = True
+        GAME_LOGIC.time_stopped = True
+        match GAME_LOGIC.hour:
+            case 0:
+                ...
+                # self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"0.ogg")))
+            case 1:
+                self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"1.ogg")))
+                TEXT.replace("", duration=4.5, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("TIC TAC", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("One hour passed.", duration=2.0, fade_out=2.0, color=(50, 50, 100), force=True)
+                TEXT.add("Look ! He's here ! The Eye in the night.", duration=4.0, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("Looking for a warm light...", duration=2.0, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("Give it to him while he want.", duration=2.0, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("Give him while you can.", duration=2.0, fade_out=2.5, color=(100, 50, 50), force=True)
+            case 2:
+                self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"2.ogg")))
+                TEXT.replace("", duration=4.5, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("TIC TAC", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("Two hours passed.", duration=2.0, fade_out=2.0, color=(50, 50, 100), force=True)
+                TEXT.add("He come from the dark;", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("The Guest we are waiting for.", duration=2.0, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("He can't wait for diner...", duration=2.0, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("But he have to wait outdoor...", duration=2.0, fade_out=2.5, color=(100, 50, 50), force=True)
+            case 3:
+                self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"3.ogg")))
+                TEXT.replace("", duration=4.0, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("TIC TAC", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("Three hours passed.", duration=2.0, fade_out=0.5, color=(50, 50, 100), force=True)
+                TEXT.add("Be careful !", duration=2.0, fade_out=0., color=(50, 50, 100), force=True)  # 10
+                TEXT.add("He's watching you", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)  # 11.5
+                TEXT.add("Inside his house made of wood.", duration=2.5, fade_out=0., color=(50, 50, 100), force=True)  # 14
+                TEXT.add("The watcher is here and wait for you;", duration=2.5, fade_out=0.0, color=(50, 50, 100), force=True)  # 16.5
+                TEXT.add("Light is only a friend of you.", duration=2.5, fade_out=2.5, color=(100, 50, 50), force=True)  # 16.5
+            case 4:
+                self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"4.ogg")))
+                TEXT.replace("", duration=4.0, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("TIC TAC", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("Four hours passed.", duration=2.0, fade_out=4.5, color=(50, 50, 100), force=True)  # 12
+                TEXT.add("George is missing, Steven is crying.", duration=3.5, fade_out=0., color=(50, 50, 100), force=True)  # 15.5
+                TEXT.add("Find George before his friend find you.", duration=2.5, fade_out=2.5, color=(100, 50, 50), force=True)
+            case 5:
+                self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"5.ogg")))
+                TEXT.replace("", duration=3.5, fade_out=0., color=(50, 50, 100), force=True)  # 3.5
+                TEXT.add("TIC TAC", duration=2.5, fade_out=0., color=(50, 50, 100), force=True)  # 6.0
+                TEXT.add("Five hours passed.", duration=2.0, fade_out=3.0, color=(50, 50, 100), force=True)  # 11
+                TEXT.add("Remember the monster under the bed ?", duration=2.5, fade_out=0., color=(50, 50, 100), force=True)  # 13.5
+                TEXT.add("The crawling thing is not a legend yet.", duration=3.5, fade_out=0.0, color=(50, 50, 100), force=True)  # 17
+                TEXT.add("He wants to play hide and seek, but...", duration=2.0, fade_out=0.0, color=(100, 50, 50), force=True)  # 20
+                TEXT.add("He don't have friends.", duration=2.5, fade_out=2.5, color=(50, 50, 100), force=True)
+
+            case 6:
+                self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"6.ogg")))
+                TEXT.replace("", duration=2.0, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("TIC TAC", duration=4.0, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("Six hours passed.", duration=2.0, fade_out=3.0, color=(50, 50, 100), force=True)  # 11
+                TEXT.add("The sinner had made a mistake;", duration=2.5, fade_out=0., color=(50, 50, 100), force=True)  # 13.5
+                TEXT.add("Unfortunately, Dad came and said :", duration=3.0, fade_out=0.0, color=(50, 50, 100), force=True)  # 16.5
+                TEXT.add("\"Don't watch those who have failed.\"", duration=2.0, fade_out=0.0, color=(100, 50, 50), force=True)  # 18.5
+                TEXT.add("\"They don't deserve.\"", duration=2.5, fade_out=2.5, color=(50, 50, 100), force=True)
+            case 7:
+                self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"7.ogg")))
+                TEXT.replace("", duration=3.5, fade_out=0., color=(50, 50, 100), force=True)  # 3.5
+                TEXT.add("TIC TAC", duration=2.5, fade_out=0., color=(50, 50, 100), force=True)  # 6.0
+                TEXT.add("Seven hours passed.", duration=2.0, fade_out=3.0, color=(50, 50, 100), force=True)  # 11
+                TEXT.add("Are you sleeping ?", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)  # 12.5
+                TEXT.add("Are you dreaming ?", duration=1.5, fade_out=0.0, color=(50, 50, 100), force=True)  # 14.0
+                TEXT.add("You'd better to, she is coming.", duration=1.5, fade_out=0.0, color=(100, 50, 50), force=True)  # 15.5
+                TEXT.add("Mom loves you;", duration=1.5, fade_out=0.0, color=(50, 50, 100), force=True)  # 17.0
+                TEXT.add("She wants a hug.", duration=1.5, fade_out=0.0, color=(50, 50, 100), force=True)  # 18.0
+                TEXT.add("Will you give it to her ?", duration=2.5, fade_out=2.5, color=(50, 50, 100), force=True)
+            case 8:
+                self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"8.ogg")))
+                TEXT.replace("", duration=1.25, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("TIC...", duration=1.75, fade_out=0., color=(50, 50, 100), force=True)  # 3.0
+                TEXT.add("...TAC ", duration=1.75, fade_out=0., color=(50, 50, 100), force=True)  # 5.0
+                TEXT.add("Eight hours passed.", duration=2.0, fade_out=1.75, color=(50, 50, 100), force=True)  # 8.5
+                TEXT.add("His eyes don't see.", duration=2.75, fade_out=0., color=(50, 50, 100), force=True)  # 11.25
+                TEXT.add("His ears spot you.", duration=2.75, fade_out=0., color=(50, 50, 100), force=True)  # 14.
+                TEXT.add("Dad may be blind,", duration=3.0, fade_out=0., color=(50, 50, 100), force=True)  # 17.
+                TEXT.add("But he still ears you.", duration=2.50, fade_out=2.5, color=(100, 50, 50), force=True)
+            case 9:
+                # self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"9.ogg")))
+                ...
+            case hour:
+                try:
+                    self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"{hour}.ogg")))
+                except FileNotFoundError:
+                    print(f"File not found: {hour}.ogg")
 
     def update(self, player):
         if self.channel.get_busy():
@@ -260,7 +349,11 @@ class BabyPhone(Interaction):
                 0.5,
             )
 
-        if GAME_LOGIC.phone_alert:
+        if self.stopped_time:
+            self.stopped_time = False
+            GAME_LOGIC.time_stopped = False
+
+        if GAME_LOGIC.phone_alert and int(GAME_LOGIC.remaining_time * 1.8) % 2:
             # {"z", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
             GAME_LOGIC.RAY_CASTER.add_light(
                 *self.pos,

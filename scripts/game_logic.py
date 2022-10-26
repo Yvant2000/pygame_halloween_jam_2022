@@ -1,3 +1,6 @@
+from random import randint
+
+
 from pygame import Surface
 from pygame.transform import scale, flip
 
@@ -16,7 +19,7 @@ from nostalgiaefilters import distortion
 
 
 class GAME_LOGIC:
-    HOUR_DURATION: float = 140.  # TODO: 140
+    HOUR_DURATION: float = 60.
 
     PLAYER: Player
     RAY_CASTER: RayCaster
@@ -37,6 +40,8 @@ class GAME_LOGIC:
 
     watcher_caught: bool
     watcher_hands: float
+
+    score: int
 
     @classmethod
     def reset(cls, endless: bool = False):
@@ -64,6 +69,8 @@ class GAME_LOGIC:
 
         cls.watcher_caught = False
         cls.watcher_hands = -3.0
+
+        cls.score = 0
 
         cls.monster_list = {
             "Hangman": Hangman(),
@@ -97,15 +104,17 @@ class GAME_LOGIC:
             Bed((0, 0.5, 3)),
             Wardrobe((0, 1, -3.21), (-0.4, 1, -3.5)),
             PissDrawer((-1.6, 0.1, 2.6)),
-            BabyPhone((-1.5, 1.1, 2.7)),
             MimicGift((-2.3, 0.4, -0.2)),
             door,
             window,
         ]
 
-        TEXT.replace("Inspect the room with the MOUSE.", duration=3, fade_out=0, force=True)
-        TEXT.add("Move with WASD.", duration=3, fade_out=0, force=True)
-        TEXT.add("Interact with LEFT CLICK.", force=True)
+        if not cls.ENDLESS:
+            cls.interaction_list.append(BabyPhone((-1.5, 1.1, 2.7)))
+
+        # TEXT.replace("Inspect the room with the MOUSE.", duration=3, fade_out=0, force=True)
+        # TEXT.add("Move with WASD.", duration=3, fade_out=0, force=True)
+        # TEXT.add("Interact with LEFT CLICK.", force=True)
 
         VISUALS.madness = 0
 
@@ -114,6 +123,8 @@ class GAME_LOGIC:
 
         cls.PLAYER.update()
         cls.display()
+
+        cls.score += DISPLAY.delta_time * 1000
 
         if not (cls.PLAYER.in_bed or cls.PLAYER.in_wardrobe):
             for interaction in cls.interaction_list:
@@ -136,29 +147,35 @@ class GAME_LOGIC:
             cls.remaining_time -= DISPLAY.delta_time
             if cls.remaining_time <= 0:
                 cls.hour += 1
-                cls.phone_alert = True
+                if not cls.ENDLESS:
+                    cls.HOUR_DURATION += 10
+                    if cls.hour < 10:
+                        cls.phone_alert = True
+                    match cls.hour:
+                        case 1:
+                            cls.monster_list["Eye"].aggressiveness = 1
+                        case 2:
+                            cls.monster_list["Guest"].aggressiveness = 1
+                        case 3:
+                            cls.monster_list["Watcher"].aggressiveness = 1
+                        case 4:
+                            cls.monster_list["Mimic"].aggressiveness = 1
+                        case 5:
+                            cls.monster_list["Crawler"].aggressiveness = 1
+                        case 6:
+                            cls.monster_list["Hangman"].aggressiveness = 1
+                        case 7:
+                            cls.monster_list["Mom"].aggressiveness = 1
+                        case 8:
+                            cls.monster_list["Dad"].aggressiveness = 1
+                        case 9:
+                            cls.monster_list["Hallucination"].aggressiveness = 1
+                        case 10:
+                            raise NotImplemented
+                else:
+                    for _ in range(3):
+                        cls.monster_list[randint(0, 7)].aggressiveness += 1
                 cls.remaining_time = cls.HOUR_DURATION
-                match cls.hour:
-                    case 1:
-                        cls.monster_list["Eye"].aggressiveness = 1
-                    case 2:
-                        cls.monster_list["Guest"].aggressiveness = 1
-                    case 3:
-                        cls.monster_list["Watcher"].aggressiveness = 1
-                    case 4:
-                        cls.monster_list["Mimic"].aggressiveness = 1
-                    case 5:
-                        cls.monster_list["Crawler"].aggressiveness = 1
-                    case 6:
-                        cls.monster_list["Hangman"].aggressiveness = 1
-                    case 7:
-                        cls.monster_list["Mom"].aggressiveness = 1
-                    case 8:
-                        cls.monster_list["Dad"].aggressiveness = 1
-                    case 9:
-                        cls.monster_list["Hallucination"].aggressiveness = 1
-                    case 10:
-                        raise NotImplemented
 
     @classmethod
     def hour_event(cls) -> None:
