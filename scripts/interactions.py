@@ -229,7 +229,6 @@ class BabyPhone(Interaction):
         self.image_alert: Surface = load_image("data", "images", "props", "babyphone_alert.png")
         self.image_on: Surface = load_image("data", "images", "props", "babyphone_on.png")
 
-        self.alert: bool = False
         self.channel: Channel = Channel(1)
         self.default_sound: Sound = Sound(join_path("data", "sounds", "sfx", "white_noise.ogg"))
 
@@ -243,9 +242,10 @@ class BabyPhone(Interaction):
         return False
 
     def interact(self, player):
-        if not self.alert:
-            self.channel.play(self.default_sound, loops=1)
+        if not GAME_LOGIC.phone_alert:
+            return self.channel.play(self.default_sound, loops=1)
 
+        GAME_LOGIC.phone_alert = False
         # TODO
 
     def update(self, player):
@@ -260,12 +260,12 @@ class BabyPhone(Interaction):
                 0.5,
             )
 
-        if self.alert:
+        if GAME_LOGIC.phone_alert:
             # {"z", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
             GAME_LOGIC.RAY_CASTER.add_light(
                 *self.pos,
-                0.8,
-                0.8, 0.2, 0.3,
+                0.6,
+                0.9, 0.2, 0.3,
             )
             return add_surface_toward_player_2d(
                 GAME_LOGIC.RAY_CASTER,
