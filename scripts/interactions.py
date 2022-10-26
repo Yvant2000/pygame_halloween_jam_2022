@@ -237,6 +237,10 @@ class BabyPhone(Interaction):
         if self.channel.get_busy():
             return False
 
+        if GAME_LOGIC.time_stopped:
+            TEXT.replace("Watch out.", duration=0.0, fade_out=0.3, color=(100, 80, 80))
+            return False
+
         if player.is_looking_at(self.pos, 0.4) and distance(player.pos, self.pos) < 2.0:
             TEXT.replace("Listen to the baby-phone", duration=0.0, fade_out=0.3, color=(100, 100, 100))
             return True
@@ -330,7 +334,7 @@ class BabyPhone(Interaction):
                 TEXT.add("But he still ears you.", duration=2.50, fade_out=2.5, color=(100, 50, 50), force=True)
             case 9:
                 # self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"9.ogg")))
-                ...
+                Sound(join_path("data", "sounds", "phone_rec", f"music_box.ogg")).play()
             case hour:
                 try:
                     self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"{hour}.ogg")))

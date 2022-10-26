@@ -19,7 +19,7 @@ from nostalgiaefilters import distortion
 
 
 class GAME_LOGIC:
-    HOUR_DURATION: float = 60.
+    HOUR_DURATION: float
 
     PLAYER: Player
     RAY_CASTER: RayCaster
@@ -43,9 +43,11 @@ class GAME_LOGIC:
 
     score: int
 
+    win: bool
+
     @classmethod
-    def reset(cls, endless: bool = False):
-        from scripts.monsters import Hangman, Mimic, Crawler, Guest, Mom, Dad, Watcher, Eye, Hallucination
+    def reset(cls, endless: bool = False, graphics: int = 1):
+        from scripts.monsters import Monster, Hangman, Mimic, Crawler, Guest, Mom, Dad, Watcher, Eye, Hallucination
         from scripts.interactions import BedsideLamp, Bed, FlashLight, Wardrobe, BabyPhone, MimicGift, Door, PissDrawer, Window
 
         cls.ENDLESS = endless
@@ -53,14 +55,16 @@ class GAME_LOGIC:
         VISUALS.reset()
         VISUALS.vignette = 5.
 
+        cls.HOUR_DURATION = 60.
+        cls.remaining_time = 3.  # TODO: set to 30
+        cls.hour = 9  # TODO: set to 0
+
         cls.PLAYER = Player()
         cls.RAY_CASTER = RayCaster()
-        cls.SURFACE = Surface((128*3, 72*3))  # 16:9
+        cls.SURFACE = Surface((128*graphics, 72*graphics))  # 16:9
 
         load_static_surfaces(cls.RAY_CASTER)
 
-        cls.hour = 0
-        cls.remaining_time = cls.HOUR_DURATION
         cls.time_stopped = False
 
         cls.door_open = False
@@ -69,6 +73,8 @@ class GAME_LOGIC:
 
         cls.watcher_caught = False
         cls.watcher_hands = -3.0
+
+        cls.win = False
 
         cls.score = 0
 
@@ -83,6 +89,10 @@ class GAME_LOGIC:
             "Eye": Eye(),
             "Hallucination": Hallucination(),
         }
+
+        if cls.ENDLESS:
+            for i in range(8):
+                list(cls.monster_list.values())[i].aggressiveness = 5  # type: Monster
         # cls.monster_list["Hangman"].aggressiveness = 20
         # cls.monster_list["Mimic"].aggressiveness = 20
         # cls.monster_list["Crawler"].aggressiveness = 20
@@ -147,47 +157,76 @@ class GAME_LOGIC:
             cls.remaining_time -= DISPLAY.delta_time
             if cls.remaining_time <= 0:
                 cls.hour += 1
+                VISUALS.min_vignette += 0.05
+                VISUALS.vignette += 0.05
+                VISUALS.min_distortion += 0.05
+                VISUALS.distortion += 0.05
                 if not cls.ENDLESS:
                     cls.HOUR_DURATION += 10
                     if cls.hour < 10:
                         cls.phone_alert = True
                     match cls.hour:
                         case 1:
-                            cls.monster_list["Eye"].aggressiveness = 1
+                            cls.monster_list["Eye"].aggressiveness = 18
                         case 2:
-                            cls.monster_list["Guest"].aggressiveness = 1
+                            cls.monster_list["Eye"].aggressiveness = 6
+                            cls.monster_list["Guest"].aggressiveness = 13
                         case 3:
-                            cls.monster_list["Watcher"].aggressiveness = 1
+                            cls.monster_list["Guest"].aggressiveness = 1
+                            cls.monster_list["Eye"].aggressiveness = 7
+                            cls.monster_list["Watcher"].aggressiveness = 15
                         case 4:
-                            cls.monster_list["Mimic"].aggressiveness = 1
+                            cls.monster_list["Watcher"].aggressiveness = 3
+                            cls.monster_list["Guest"].aggressiveness = 2
+                            cls.monster_list["Eye"].aggressiveness = 8
+                            cls.monster_list["Mimic"].aggressiveness = 10
                         case 5:
-                            cls.monster_list["Crawler"].aggressiveness = 1
+                            cls.monster_list["Mimic"].aggressiveness = 2
+                            cls.monster_list["Watcher"].aggressiveness = 5
+                            cls.monster_list["Eye"].aggressiveness = 9
+                            cls.monster_list["Crawler"].aggressiveness = 15
                         case 6:
-                            cls.monster_list["Hangman"].aggressiveness = 1
+                            cls.monster_list["Crawler"].aggressiveness = 5
+                            cls.monster_list["Mimic"].aggressiveness = 3
+                            cls.monster_list["Watcher"].aggressiveness = 6
+                            cls.monster_list["Guest"].aggressiveness = 3
+                            cls.monster_list["Eye"].aggressiveness = 10
+                            cls.monster_list["Hangman"].aggressiveness = 12
                         case 7:
-                            cls.monster_list["Mom"].aggressiveness = 1
+                            cls.monster_list["Hangman"].aggressiveness = 4
+                            cls.monster_list["Mimic"].aggressiveness = 4
+                            cls.monster_list["Watcher"].aggressiveness = 7
+                            cls.monster_list["Mom"].aggressiveness = 13
                         case 8:
-                            cls.monster_list["Dad"].aggressiveness = 1
+                            cls.monster_list["Mom"].aggressiveness = 5
+                            cls.monster_list["Hangman"].aggressiveness = 6
+                            cls.monster_list["Mimic"].aggressiveness = 5
+                            cls.monster_list["Watcher"].aggressiveness = 8
+                            cls.monster_list["Guest"].aggressiveness = 7
+                            cls.monster_list["Dad"].aggressiveness = 15
                         case 9:
-                            cls.monster_list["Hallucination"].aggressiveness = 1
+                            cls.monster_list["Dad"].aggressiveness = 7
+                            cls.monster_list["Mom"].aggressiveness = 8
+                            cls.monster_list["Hangman"].aggressiveness = 8
+                            cls.monster_list["Crawler"].aggressiveness = 8
+                            cls.monster_list["Mimic"].aggressiveness = 7
+                            cls.monster_list["Guest"].aggressiveness = 5
+                            cls.monster_list["Hallucination"].aggressiveness = 5
+
                         case 10:
-                            raise NotImplemented
+                            for monster in cls.monster_list.values():
+                                monster.state = 0
+                                monster.aggressiveness = 0
+                            cls.win = True
+                            cls.HOUR_DURATION = 10.
+                        case 11:
+                            GAME_OVER_SCREEN.killer = ""
+                            GAME_OVER_SCREEN.reason = "You survived the night!"
+                            cls.game_over()
                 else:
                     for _ in range(3):
-                        cls.monster_list[randint(0, 7)].aggressiveness += 1
+                        list(cls.monster_list.values())[randint(0, 7)].aggressiveness += 1
                 cls.remaining_time = cls.HOUR_DURATION
-
-    @classmethod
-    def hour_event(cls) -> None:
-        """
-        Called every hour.
-        Define the new events happening at each hour.
-        """
-        match cls.hour:
-            case 1:
-                ...
-            case _:
-                ...
 
     @classmethod
     def display(cls) -> None:
@@ -201,6 +240,17 @@ class GAME_LOGIC:
             effect = Surface((cls.SURFACE.get_size()))
             effect.blit(scale(madness_visual, cls.SURFACE.get_size()), (0, 0))
             distortion(effect, cls.SURFACE, True, True, cls.SURFACE.get_width() * 0.03, 0.01 + VISUALS.madness * 0.05, 0.03)
+
+        if cls.win:
+            if VISUALS.min_distortion > 0:
+                VISUALS.min_distortion -= 0.1 * DISPLAY.delta_time
+            if VISUALS.min_vignette > 0:
+                VISUALS.min_vignette -= 0.1 * DISPLAY.delta_time
+            cls.RAY_CASTER.add_light(
+                3.0, 1.0, 2.0,
+                15 * (10 - cls.remaining_time) / 10,
+                1.0, 1.0, 1.0,
+            )
 
         # {"z", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
         cls.RAY_CASTER.add_light(
@@ -298,4 +348,4 @@ class GAME_LOGIC:
     def game_over(cls):
         from scripts.game import GAME
         GAME.state = GameState.GAME_OVER
-        GAME_OVER_SCREEN.reset()
+        GAME_OVER_SCREEN.reset(cls.ENDLESS, cls.score)

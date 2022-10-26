@@ -29,10 +29,13 @@ class MAIN_MENU:
     main_game_beaten: bool = False
     endless_mode_score: int = 0
 
+    quality: int = 1
+
     BUTTONS: list[Button] = [
         Button("play", 243, 116),
         Button("endless", 243, 185) if main_game_beaten else Button("endless_blocked", 243, 185),
-        Button("quit", 243, 260)
+        Button("quit", 243, 260),
+        Button("graphism2", 40, 310),
     ]
 
     white_noise: Sound = Sound(join_path("data", "sounds", "sfx", "white_noise_hit.ogg"))
@@ -52,7 +55,7 @@ class MAIN_MENU:
             from scripts.game_logic import GAME_LOGIC
             match cls.selected_button:
                 case 0:
-                    GAME_LOGIC.reset()
+                    GAME_LOGIC.reset(graphics=cls.quality + 1)
                     GAME.state = GameState.PLAYING
                 case 1:
                     if not cls.main_game_beaten:
@@ -60,9 +63,13 @@ class MAIN_MENU:
                             VISUALS.fried = 1.0
                             cls.white_noise.play()
                         return
-                    raise NotImplementedError  # TODO: Implement endless mode
+                    GAME_LOGIC.reset(True, graphics=cls.quality + 1)
+                    GAME.state = GameState.PLAYING
                 case 2:  # QUIT BUTTON
                     GAME.state = GameState.QUIT
+                case 3:
+                    cls.quality = (cls.quality - 1) % 3
+                    cls.BUTTONS[-1] = Button(f"graphism{cls.quality+1}", 40, 310)
 
         elif INPUT.up():
             if not cls.pressing_up:

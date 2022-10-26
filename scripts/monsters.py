@@ -86,7 +86,7 @@ class Hangman(Monster):
                 GAME_OVER_SCREEN.killer = "hangman"
                 GAME_LOGIC.game_over()
 
-        if GAME_LOGIC.time_stopped:
+        if GAME_LOGIC.time_stopped and not self.state:
             return
 
         self.timer -= DISPLAY.delta_time * randint(1, 3) / 3
@@ -363,6 +363,13 @@ class Crawler(Monster):
         elif self.state == 2:
             set_stereo_volume(GAME_LOGIC.PLAYER, (self.x, 0, self.z), self.channel)
             self.timer -= DISPLAY.delta_time
+            if len(TEXT.text_list) < 2:
+                TEXT.add(
+                    " " * randint(0, 8) + "HIDE" + " " * randint(0, 8),
+                    duration=0.08, fade_out=0., color=(50, 5, 5), font="HelpMe",
+                    y=randint(50, DISPLAY.screen_size[1] - 50), size=32
+                )
+            VISUALS.fish_eye = 0.8
             if self.timer <= 0:
                 self.timer = 1.0
                 target = GAME_LOGIC.PLAYER.pos if not (GAME_LOGIC.PLAYER.in_wardrobe or GAME_LOGIC.PLAYER.in_bed) else (0, 0, 1.3)
@@ -459,7 +466,7 @@ class Guest(Monster):
         self.running_sound: Sound = Sound(join_path("data", "sounds", "sfx", "guest_running.ogg"))
 
     def update(self):
-        if not self.aggressiveness or GAME_LOGIC.monster_list["Mom"].state:
+        if not self.aggressiveness or GAME_LOGIC.monster_list["Mom"].state or GAME_LOGIC.monster_list["Dad"].state:
             return
 
         match self.state:
@@ -512,7 +519,11 @@ class Guest(Monster):
                         GAME_LOGIC.game_over()
                     return
                 if GAME_LOGIC.door_open:
-                    if (GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light) and not GAME_LOGIC.time_stopped:
+                    if GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light:
+                        if GAME_LOGIC.time_stopped:
+                            self.state = 1
+                            self.timer = 20.
+                            return
                         self.running = True
                         self.channel.play(self.running_sound)
                         self.scream_sound.play()
@@ -811,9 +822,6 @@ class Watcher(Monster):
         if not self.aggressiveness or GAME_LOGIC.watcher_caught:
             return
 
-        if GAME_LOGIC.time_stopped:
-            return
-
         if self.state == 1 or self.state == 2:
             if GAME_LOGIC.PLAYER.in_wardrobe:
                 if self.breath_sound.get_num_channels() == 0:
@@ -840,6 +848,9 @@ class Watcher(Monster):
                                           "If you don't force him to leave fast enough, he will stay forever."
                 GAME_OVER_SCREEN.killer = "watcher_hands"
                 return
+
+        if GAME_LOGIC.time_stopped:
+            return
 
         if self.state < 3 or GAME_LOGIC.wardrobe_open:
             self.timer -= (
@@ -935,7 +946,13 @@ class Eye(Monster):
 
         self.fear: float = 0.
 
-        self.image = load_image("data", "images", "monsters", "eye.png")
+        self.image = load_image("data", "images", "monsters", "Eye_in_the_night.png")
+        self.dark_image = load_image("data", "images", "monsters", "Eye_in_the_night_2.png")
+        self.eyes_image: tuple[Surface, ...] = (
+            load_image("data", "images", "monsters", "Eye_1.png"),
+            load_image("data", "images", "monsters", "Eye_2.png"),
+            load_image("data", "images", "monsters", "Eye_3.png"),
+        )
 
         self.scared_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'eye_scared.ogg'))
         self.chanel: Channel = Channel(8)
@@ -958,7 +975,7 @@ class Eye(Monster):
                 # TODO: sound eye caught
                 self.state = 0
                 self.chanel.stop()
-                self.timer = 20.
+                self.timer = 10.
             return
         self.fear = max(0., self.fear - DISPLAY.delta_time)
 
@@ -980,7 +997,7 @@ class Eye(Monster):
             return
 
         if self.x > 0:
-            self.x -= (DISPLAY.delta_time * 0.1
+            self.x -= (DISPLAY.delta_time * 0.5
                        * (1 + self.aggressiveness / 10)
                        * (0.5 * (GAME_LOGIC.PLAYER.use_flashlight + GAME_LOGIC.PLAYER.bedside_light * 2)))
             if self.x <= 0:
@@ -1002,10 +1019,22 @@ class Eye(Monster):
         if not self.aggressiveness or not self.state:
             return
 
+        if GAME_LOGIC.PLAYER.use_flashlight:
+            temp = self.image.copy()
+            temp.blit(self.eyes_image[min(2, int(self.fear / 0.3))], (randint(-5, 5) * self.fear, randint(-2, 2) * self.fear))
+            add_surface_toward_player_2d(
+                GAME_LOGIC.RAY_CASTER,
+                GAME_LOGIC.PLAYER,
+                temp,
+                (2.8 + self.x, 0.0, 1.6),
+                0.8, 2.0
+            )
+            return
+
         add_surface_toward_player_2d(
             GAME_LOGIC.RAY_CASTER,
             GAME_LOGIC.PLAYER,
-            self.image,
+            self.dark_image,
             (2.8 + self.x, 0.0, 1.6),
             0.8, 2.0
         )
@@ -1015,6 +1044,12 @@ class Hallucination(Monster):
     def __init__(self):
         super().__init__()
         self.timer = 20.
+        self.sounds: tuple[Sound, ...] = (
+            Sound(join_path('data', 'sounds', 'phone_rec', 'chuchotage.ogg')),
+            Sound(join_path('data', 'sounds', 'phone_rec', 'chuchotement_eyen_in_da_night.ogg')),
+            Sound(join_path('data', 'sounds', 'phone_rec', 'hes_missing_goerges.ogg')),
+            Sound(join_path('data', 'sounds', 'phone_rec', 'hes_watching_seeyou.ogg')),
+        )
 
     def update(self):
         if not self.aggressiveness:
@@ -1029,8 +1064,9 @@ class Hallucination(Monster):
                     return
 
                 case 1:
-                    print("effet sonore")
-                    # TODO: sound hallucination
+                    sound = random_choice(self.sounds)
+                    sound.set_volume(randint(1, 5) / 10)
+                    sound.play()
                     return
 
                 case 2:
