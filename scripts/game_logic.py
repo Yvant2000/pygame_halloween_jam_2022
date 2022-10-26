@@ -47,7 +47,7 @@ class GAME_LOGIC:
 
     @classmethod
     def reset(cls, endless: bool = False, graphics: int = 1):
-        from scripts.monsters import Monster, Hangman, Mimic, Crawler, Guest, Mom, Dad, Watcher, Eye, Hallucination
+        from scripts.monsters import Hangman, Mimic, Crawler, Guest, Mom, Dad, Watcher, Eye, Hallucination
         from scripts.interactions import BedsideLamp, Bed, FlashLight, Wardrobe, BabyPhone, MimicGift, Door, PissDrawer, Window
 
         cls.ENDLESS = endless
@@ -92,7 +92,7 @@ class GAME_LOGIC:
 
         if cls.ENDLESS:
             for i in range(8):
-                list(cls.monster_list.values())[i].aggressiveness = 5  # type: Monster
+                list(cls.monster_list.values())[i].aggressiveness = 20
 
         # cls.monster_list["Hangman"].aggressiveness = 20
         # cls.monster_list["Mimic"].aggressiveness = 20
@@ -135,7 +135,7 @@ class GAME_LOGIC:
         cls.PLAYER.update()
         cls.display()
 
-        cls.score += DISPLAY.delta_time * 1000
+        cls.score += DISPLAY.delta_time * 100
 
         if not (cls.PLAYER.in_bed or cls.PLAYER.in_wardrobe):
             for interaction in cls.interaction_list:
@@ -162,6 +162,7 @@ class GAME_LOGIC:
                 VISUALS.vignette += 0.05
                 VISUALS.min_distortion += 0.05
                 VISUALS.distortion += 0.05
+                VISUALS.madness += 0.005
                 if not cls.ENDLESS:
                     cls.HOUR_DURATION += 10
                     if cls.hour < 10:
@@ -292,7 +293,7 @@ class GAME_LOGIC:
 
             cls.RAY_CASTER.raycasting(
                 cls.SURFACE,
-                -0.4, cls.PLAYER.height, -3.4 - max(0., cls.watcher_hands * 0.3),
+                -0.4, cls.PLAYER.height, -3.4 - max(0., cls.watcher_hands * 0.2),
                 0,
                 90,
                 DISPLAY.FOV,
@@ -312,7 +313,8 @@ class GAME_LOGIC:
                 cls.SURFACE.blit(flip(surf, True, False), (w - cls.watcher_hands * 0.7 * w, 0))
                 if cls.watcher_hands >= 1.0:
                     cls.game_over()
-                cls.watcher_hands += DISPLAY.delta_time * 3.0
+                    return
+                cls.watcher_hands += DISPLAY.delta_time * 2.5
         else:
             if cls.PLAYER.use_flashlight:
                 cls.RAY_CASTER.add_light(

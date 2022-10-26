@@ -35,13 +35,15 @@ class MAIN_MENU:
 
     white_noise: Sound = Sound(join_path("data", "sounds", "sfx", "white_noise_hit.ogg"))
 
+    pseudo: str = 'KID'
+
     @classmethod
     def reload_buttons(cls):
         cls.BUTTONS: list[Button] = [
             Button("play", 243, 116),
             Button("endless", 243, 185) if cls.main_game_beaten else Button("endless_blocked", 243, 185),
             Button("quit", 243, 260),
-            Button("graphism2", 40, 310),
+            Button(f"graphism{cls.quality + 1}", 40, 310),
         ]
 
     @classmethod
@@ -97,9 +99,11 @@ try:
         content = file.read().split("\n")
         MAIN_MENU.main_game_beaten = content[0] == "True"
         MAIN_MENU.endless_mode_score = int(content[1])
+        MAIN_MENU.pseudo = content[2]
 except FileNotFoundError:
+    pass
+except IndexError:
     pass
 
 
 MAIN_MENU.reload_buttons()
-

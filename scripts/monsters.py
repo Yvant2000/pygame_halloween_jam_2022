@@ -618,8 +618,8 @@ class Guest(Monster):
                 if self.running:
                     GAME_LOGIC.RAY_CASTER.add_surface(
                         self.running_image,
-                        2.5 + self.x, 2.0, -0.2,
-                        2.5 + self.x, 0.0, -1.4,
+                        2.5 + self.x, 2.0, -0.3,
+                        2.5 + self.x, 0.0, -1.5,
                         rm=True,
                     )
                 else:
@@ -812,8 +812,8 @@ class Watcher(Monster):
         self.state = 0
         self.fear: float = 0.
 
-        self.looking_image = load_image("data", "images", "monsters", "watcher_looking.png")
-        self.inside_image = load_image("data", "images", "monsters", "watcher_inside.png")
+        self.looking_image = load_image("data", "images", "monsters", "The_watcher_mouth.png")
+        self.inside_image = load_image("data", "images", "monsters", "The_watcher.png")
 
         self.breath_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'watcher_breath.ogg'))
         self.scared_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'bed.ogg'))
@@ -844,7 +844,7 @@ class Watcher(Monster):
                 GAME_LOGIC.watcher_caught = True
                 GAME_LOGIC.time_stopped = True
                 GAME_OVER_SCREEN.reason = "You went to the wardrobe with the Watcher inside.\n" \
-                                          "Use your light if you see his eyes to make him leave.\n" \
+                                          "Use your light if you see his face to make him leave.\n" \
                                           "If you don't force him to leave fast enough, he will stay forever."
                 GAME_OVER_SCREEN.killer = "watcher_hands"
                 return
@@ -904,7 +904,7 @@ class Watcher(Monster):
                         GAME_LOGIC.PLAYER,
                         self.looking_image,
                         (-1.2, 0.0, -3.37),
-                        0.8, 2.0
+                        0.8, 1.9
                     )
 
             case 2:
@@ -914,15 +914,15 @@ class Watcher(Monster):
                         GAME_LOGIC.PLAYER,
                         self.looking_image,
                         (-0.4, 0.0, -3.37),
-                        0.8, 2.0
+                        0.8, 1.9
                     )
 
             case 3:
                 if GAME_LOGIC.wardrobe_open and GAME_LOGIC.PLAYER.use_flashlight:
                     GAME_LOGIC.RAY_CASTER.add_surface(
                         self.inside_image,
-                        -0.0, 2.0, -3.45,
-                        -0.8, 0.0, -3.45,
+                        -0.1, 1.9, -3.45,
+                        -0.7, 0.0, -3.45,
                         rm=True,
                     )
                 else:
@@ -931,7 +931,7 @@ class Watcher(Monster):
                         GAME_LOGIC.PLAYER,
                         self.looking_image,
                         (-0.4, 0.0, -3.37),
-                        0.8, 2.0
+                        0.8, 1.9
                     )
 
 

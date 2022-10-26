@@ -27,6 +27,7 @@ class GAME:
     @classmethod
     def main(cls):
         while True:
+            print(MAIN_MENU.quality)
             cls.events_handler()
             INPUT.update()
 
