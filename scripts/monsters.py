@@ -804,6 +804,9 @@ class Watcher(Monster):
         self.looking_image = load_image("data", "images", "monsters", "watcher_looking.png")
         self.inside_image = load_image("data", "images", "monsters", "watcher_inside.png")
 
+        self.breath_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'watcher_breath.ogg'))
+        self.scared_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'bed.ogg'))
+
     def update(self):
         if not self.aggressiveness or GAME_LOGIC.watcher_caught:
             return
@@ -813,16 +816,16 @@ class Watcher(Monster):
 
         if self.state == 1 or self.state == 2:
             if GAME_LOGIC.PLAYER.in_wardrobe:
-                # TODO: play breath sound
-                ...
+                if self.breath_sound.get_num_channels() == 0:
+                    self.breath_sound.play()
             else:
                 pos = (-1.2, 1.4, -3.37) if self.state == 1 else (-0.4, 1.4, -3.37)
                 if GAME_LOGIC.PLAYER.use_flashlight and GAME_LOGIC.PLAYER.is_looking_at(pos, 0.6) and distance_2d(GAME_LOGIC.PLAYER.pos, pos) < 3.0:
                     self.fear += DISPLAY.delta_time * (1 - 0.5 * (self.state == 2))
                     VISUALS.shake += 1.5 * DISPLAY.delta_time
                     VISUALS.distortion += 1.5 * DISPLAY.delta_time
-                    #TODO: sound watcher scared
                     if self.fear >= 1.0:
+                        self.scared_sound.play()
                         self.state = 0
                         self.timer = 20.
                     return
@@ -832,7 +835,7 @@ class Watcher(Monster):
             if GAME_LOGIC.PLAYER.in_wardrobe:
                 GAME_LOGIC.watcher_caught = True
                 GAME_LOGIC.time_stopped = True
-                GAME_OVER_SCREEN.reason = "You went to the wardrobe with the watcher inside.\n" \
+                GAME_OVER_SCREEN.reason = "You went to the wardrobe with the Watcher inside.\n" \
                                           "Use your light if you see his eyes to make him leave.\n" \
                                           "If you don't force him to leave fast enough, he will stay forever."
                 GAME_OVER_SCREEN.killer = "watcher_hands"
@@ -866,7 +869,7 @@ class Watcher(Monster):
                     if GAME_LOGIC.PLAYER.in_wardrobe:
                         GAME_LOGIC.watcher_caught = True
                         GAME_LOGIC.time_stopped = True
-                        GAME_OVER_SCREEN.reason = "The watcher caught you in the wardrobe.\n" \
+                        GAME_OVER_SCREEN.reason = "The Watcher caught you in the wardrobe.\n" \
                                                   "Leave the wardrobe if you hear his breath.\n" \
                                                   "Use your light if you see his eyes to make him leave.\n" \
                                                   "If you don't force him to leave fast enough, he will stay forever."
@@ -927,17 +930,21 @@ class Eye(Monster):
         self.timer = 10.
 
         self.x = 8.
-        self.state = True
+        self.state = 0.0
         self.window = None
 
         self.fear: float = 0.
 
         self.image = load_image("data", "images", "monsters", "eye.png")
 
+        self.scared_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'eye_scared.ogg'))
+        self.chanel: Channel = Channel(8)
+
     def update(self):
         if not self.aggressiveness:
             return
 
+        self.chanel.set_volume(self.fear)
         if (self.state
                 and GAME_LOGIC.PLAYER.use_flashlight
                 and GAME_LOGIC.PLAYER.is_looking_at((2.8 + self.x, 1.0, 1.6))
@@ -945,12 +952,12 @@ class Eye(Monster):
                 and GAME_LOGIC.PLAYER.z > 1.0
                 and self.x < 2.0):
             self.fear += DISPLAY.delta_time * (1 - self.aggressiveness / 25)
-            # TODO: sound eye scared
             VISUALS.shake = self.fear
             VISUALS.vignette = self.fear
             if self.fear >= 1.0:
                 # TODO: sound eye caught
-                self.state = False
+                self.state = 0
+                self.chanel.stop()
                 self.timer = 20.
             return
         self.fear = max(0., self.fear - DISPLAY.delta_time)
@@ -966,6 +973,8 @@ class Eye(Monster):
             if self.timer <= 0:
                 # TODO: sound eye wisper
                 self.state = True
+                self.chanel.set_volume(0)
+                self.chanel.play(self.scared_sound, loops=-1)
                 self.fear = 0.
                 self.x = 8.
             return
