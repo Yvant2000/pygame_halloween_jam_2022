@@ -43,8 +43,9 @@ class GAME_OVER_SCREEN:
             from scripts.main_menu import MAIN_MENU
             if not MAIN_MENU.main_game_beaten:
                 MAIN_MENU.main_game_beaten = True
-                TEXT.replace("", duration=2.0, fade_out=0, color=(50, 100, 50), size=32)
-                TEXT.add("Endless mode unlocked.", duration=25, fade_out=5, color=(50, 100, 50), size=32)
+                MAIN_MENU.reload_buttons()
+                TEXT.replace("", duration=3.0, fade_out=0, size=32)
+                TEXT.add("Endless mode unlocked.", duration=25, fade_out=5, color=(50, 150, 50), size=16)
                 with open("save.txt", "w") as file:
                     file.write("True\n0")
 
@@ -66,7 +67,7 @@ class GAME_OVER_SCREEN:
             if cls.killer:
                 DISPLAY.screen.blit(cls.screen, (0, 0))
             else:
-                if not randint(1, int(5 / DISPLAY.delta_time)):
+                if not randint(0, int(4 / DISPLAY.delta_time)):
                     DISPLAY.screen.blit(cls.ew_win_image, (0, 0))
                 else:
                     DISPLAY.screen.blit(cls.win_image, (0, 0))

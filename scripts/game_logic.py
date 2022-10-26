@@ -56,8 +56,8 @@ class GAME_LOGIC:
         VISUALS.vignette = 5.
 
         cls.HOUR_DURATION = 60.
-        cls.remaining_time = 3.  # TODO: set to 30
-        cls.hour = 9  # TODO: set to 0
+        cls.remaining_time = 30.
+        cls.hour = 0
 
         cls.PLAYER = Player()
         cls.RAY_CASTER = RayCaster()
@@ -93,6 +93,7 @@ class GAME_LOGIC:
         if cls.ENDLESS:
             for i in range(8):
                 list(cls.monster_list.values())[i].aggressiveness = 5  # type: Monster
+
         # cls.monster_list["Hangman"].aggressiveness = 20
         # cls.monster_list["Mimic"].aggressiveness = 20
         # cls.monster_list["Crawler"].aggressiveness = 20
@@ -122,9 +123,9 @@ class GAME_LOGIC:
         if not cls.ENDLESS:
             cls.interaction_list.append(BabyPhone((-1.5, 1.1, 2.7)))
 
-        # TEXT.replace("Inspect the room with the MOUSE.", duration=3, fade_out=0, force=True)
-        # TEXT.add("Move with WASD.", duration=3, fade_out=0, force=True)
-        # TEXT.add("Interact with LEFT CLICK.", force=True)
+        TEXT.replace("Inspect the room with the MOUSE.", duration=3, fade_out=0, force=True)
+        TEXT.add("Move with WASD.", duration=3, fade_out=0, force=True)
+        TEXT.add("Interact with LEFT CLICK.", force=True)
 
         VISUALS.madness = 0
 

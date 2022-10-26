@@ -27,18 +27,22 @@ class MAIN_MENU:
     pressing_down: bool = False
 
     main_game_beaten: bool = False
-    endless_mode_score: int = 0
+    endless_mode_score: int = 0.
 
     quality: int = 1
 
-    BUTTONS: list[Button] = [
-        Button("play", 243, 116),
-        Button("endless", 243, 185) if main_game_beaten else Button("endless_blocked", 243, 185),
-        Button("quit", 243, 260),
-        Button("graphism2", 40, 310),
-    ]
+    BUTTONS: list[Button]
 
     white_noise: Sound = Sound(join_path("data", "sounds", "sfx", "white_noise_hit.ogg"))
+
+    @classmethod
+    def reload_buttons(cls):
+        cls.BUTTONS: list[Button] = [
+            Button("play", 243, 116),
+            Button("endless", 243, 185) if cls.main_game_beaten else Button("endless_blocked", 243, 185),
+            Button("quit", 243, 260),
+            Button("graphism2", 40, 310),
+        ]
 
     @classmethod
     def update(cls) -> None:
@@ -95,3 +99,7 @@ try:
         MAIN_MENU.endless_mode_score = int(content[1])
 except FileNotFoundError:
     pass
+
+
+MAIN_MENU.reload_buttons()
+

@@ -39,12 +39,12 @@ class Hangman(Monster):
         super().__init__(*args, **kwargs)
         self.madness: int = 0
 
-        self.image = load_image("data", "images", "monsters", "hangman.png")
+        self.image = load_image("data", "images", "monsters", "The_sinner.png")
         self.x = 0
         self.y = 2.0
         self.z = 0
         self.width = 1
-        self.height = 2.5
+        self.height = 2.7
         self.state = 0
         self.timer = 30.
 
@@ -117,7 +117,7 @@ class Hangman(Monster):
                 GAME_LOGIC.RAY_CASTER,
                 GAME_LOGIC.PLAYER,
                 self.image,
-                (self.x + sin(self.timer) / 10, 0.5 + self.y, self.z),
+                (self.x + sin(self.timer) / 10, 0.3 + self.y, self.z),
                 self.width,
                 self.height,
             )
