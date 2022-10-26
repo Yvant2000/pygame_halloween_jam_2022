@@ -660,6 +660,7 @@ class Mom(Monster):
 
             VISUALS.fish_eye = self.angriness + VISUALS.min_fish_eye
             VISUALS.vignette = self.angriness + VISUALS.min_vignette
+            #TODO: sound mom angry
             if len(TEXT.text_list) < 2:
                 TEXT.add(
                     " " * randint(0, 5) + "GO TO BED" + " " * randint(0, 5),
@@ -716,6 +717,10 @@ class Dad(Monster):
         self.state = False
         self.timer = 40.
         self.angriness: float = 0.
+        self.light: bool = False
+
+        self.open_door_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'door_open_fast.ogg'))
+        self.light_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'corridor_click.ogg'))
 
     def update(self):
         if not self.aggressiveness:
@@ -723,12 +728,27 @@ class Dad(Monster):
 
         if self.state:
             GAME_LOGIC.door_open = True
+
+            if not self.light:
+                self.timer -= DISPLAY.delta_time
+                if self.timer <= 0:
+                    self.timer = 15.
+                    self.light = True
+                    self.light_sound.play()
+                return
+
             if not GAME_LOGIC.PLAYER.in_wardrobe and (INPUT.jump() or INPUT.left() or INPUT.right() or INPUT.up() or INPUT.down()):
-                self.angriness += DISPLAY.delta_time * 0.2 * (1 + self.aggressiveness / 10)
+                self.angriness += DISPLAY.delta_time * 0.2 * (1 + self.aggressiveness / 5)
+                if len(TEXT.text_list) < 2:
+                    TEXT.add(
+                        " " * randint(0, 5) + "I HEAR YOU" + " " * randint(0, 5),
+                        duration=0.08, fade_out=0., color=(70, 5, 5), font="HelpMe",
+                        y=randint(50, DISPLAY.screen_size[1] - 50), size=int(32 * (1 + self.angriness))
+                    )
                 # TODO: sound dad angry
 
             VISUALS.shake = self.angriness + VISUALS.min_shake
-            VISUALS.fried = self.angriness + VISUALS.min_fried
+            VISUALS.distortion = self.angriness + VISUALS.min_distortion
 
             if self.angriness > 1.0:
                 GAME_OVER_SCREEN.reason = "Dad will get angry if you move.\n" \
@@ -743,15 +763,16 @@ class Dad(Monster):
             if self.state:
                 GAME_LOGIC.time_stopped = True
                 self.angriness = 0.
-                self.timer = 15.
+                self.timer = 1.
                 self.door.angle = 90.
-                # TODO: sound door open
+                self.light = False
+                if not GAME_LOGIC.door_open:
+                    self.open_door_sound.play()
                 # TODO: sound dad
-                # TODO: sound light
             else:
                 GAME_LOGIC.time_stopped = False
                 self.timer = 60.
-                # TODO: sound light off
+                self.light_sound.play()
 
         if GAME_LOGIC.time_stopped:
             return
@@ -764,12 +785,13 @@ class Dad(Monster):
 
     def draw(self):
         if self.state:
-            GAME_LOGIC.RAY_CASTER.add_light(
-                2.5, 2.0, -1.0,
-                5.0,
-                1.0, 0.0, 0.0,
-                -2.5, 0.0, -1.0,
-            )
+            if self.light:
+                GAME_LOGIC.RAY_CASTER.add_light(
+                    2.5, 2.0, -1.0,
+                    5.0,
+                    1.0, 0.0, 0.0,
+                    -2.5, 0.0, -1.0,
+                )
 
 
 class Watcher(Monster):

@@ -77,8 +77,8 @@ class GAME_LOGIC:
         # cls.monster_list["Hangman"].aggressiveness = 20
         # cls.monster_list["Mimic"].aggressiveness = 20
         # cls.monster_list["Crawler"].aggressiveness = 20
-        cls.monster_list["Mom"].aggressiveness = 20
-        # cls.monster_list["Dad"].aggressiveness = 20
+        # cls.monster_list["Mom"].aggressiveness = 20
+        cls.monster_list["Dad"].aggressiveness = 20
         # cls.monster_list["Eye"].aggressiveness = 20
         # cls.monster_list['Guest'].aggressiveness = 20
 
