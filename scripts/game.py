@@ -11,8 +11,8 @@ from scripts.game_over import GAME_OVER_SCREEN
 from scripts.utils import GameState
 from scripts.visuals import VISUALS
 
-set_num_channels(16)
-set_reserved_channels(8)
+set_num_channels(24)
+set_reserved_channels(12)
 
 
 class GAME:

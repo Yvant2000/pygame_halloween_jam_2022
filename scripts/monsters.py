@@ -49,9 +49,9 @@ class Hangman(Monster):
         self.timer = 30.
 
         self.rope_sound = Sound(join_path("data", "sounds", "sfx", "rope.ogg"))
-        self.channel: Channel = Channel(2)
+        self.channel: Channel = Channel(4)
         self.danger_sound = Sound(join_path("data", "sounds", "sfx", "hangman_danger.ogg"))
-        self.danger_channel: Channel = Channel(3)
+        self.danger_channel: Channel = Channel(5)
 
     def update(self):
         """Update the monster each frame."""
@@ -125,6 +125,7 @@ class Hangman(Monster):
 
 class Mimic(Monster):
     def __init__(self):
+        # TODO: Sounds
         super().__init__()
 
         self.front_image: Surface = load_image("data", "images", "props", "chest_front.png")
@@ -317,6 +318,10 @@ class Crawler(Monster):
 
         self.angle_y = 0.0
 
+        self.channel: Channel = Channel(7)
+
+        self.sound: Sound = Sound(join_path("data", "sounds", "sfx", "crawler.ogg"))
+
     def update(self):
 
         if not self.aggressiveness:
@@ -356,6 +361,7 @@ class Crawler(Monster):
                 return
 
         elif self.state == 2:
+            set_stereo_volume(GAME_LOGIC.PLAYER, (self.x, 0, self.z), self.channel)
             self.timer -= DISPLAY.delta_time
             if self.timer <= 0:
                 self.timer = 1.0
@@ -369,6 +375,7 @@ class Crawler(Monster):
                 if distance_2d((self.x, 0.0, self.z), target) < 1.0:
                     if GAME_LOGIC.PLAYER.in_wardrobe or GAME_LOGIC.PLAYER.in_bed:
                         self.state = 0
+                        self.channel.stop()
                         self.timer = 20.
                         GAME_LOGIC.time_stopped = False
                     else:
@@ -396,7 +403,7 @@ class Crawler(Monster):
                     self.can_grab = True
                     self.timer = 30.
                 case 2:
-                    #TODO: sounds
+                    self.channel.play(self.sound)
                     self.x = 0.
                     self.z = 1.3
                     self.timer = 2.5
@@ -442,27 +449,44 @@ class Guest(Monster):
 
         self.scream_sound: Sound = Sound(join_path("data", "sounds", "sfx", "guest_scream.ogg"))
 
+        self.door_hit_sound: Sound = Sound(join_path("data", "sounds", "sfx", "guest_door_hit.ogg"))
+
+        self.lost_sound: Sound = Sound(join_path("data", "sounds", "sfx", "guest_lost.ogg"))
+        self.breath_sound: Sound = Sound(join_path("data", "sounds", "sfx", "guest_breath.ogg"))
+
+        self.channel: Channel = Channel(6)
+        self.channel.set_volume(0., 0.)
+        self.running_sound: Sound = Sound(join_path("data", "sounds", "sfx", "guest_running.ogg"))
+
     def update(self):
         if not self.aggressiveness or GAME_LOGIC.monster_list["Mom"].state:
             return
 
         match self.state:
             case 1:
-                if GAME_LOGIC.PLAYER.use_flashlight and GAME_LOGIC.door_open:
-                    if GAME_LOGIC.PLAYER.is_looking_at((7., 1., -0.8), 1.5):
-                        if GAME_LOGIC.PLAYER.x > 1.2 and -1.6 < GAME_LOGIC.PLAYER.z < -0.4:
-                            self.x -= DISPLAY.delta_time
-                            if self.x <= 0:
-                                self.state = 0
-                                self.timer = 20.
-                            return
+                if GAME_LOGIC.door_open:
+                    if self.channel.get_busy():
+                        GAME_OVER_SCREEN.reason = "Don't open while the Guest is knocking the door."
+                        GAME_OVER_SCREEN.killer = "guest"
+                        GAME_LOGIC.game_over()
+                        return
+                    if GAME_LOGIC.PLAYER.use_flashlight:
+                        if GAME_LOGIC.PLAYER.is_looking_at((7., 1., -0.8), 1.5):
+                            if GAME_LOGIC.PLAYER.x > 1.2 and -1.6 < GAME_LOGIC.PLAYER.z < -0.4:
+                                self.x -= DISPLAY.delta_time
+                                if self.x <= 0:
+                                    self.state = 0
+                                    self.timer = 20.
+                                return
                 self.x = min(1.0, self.x + DISPLAY.delta_time)
             case 2:
                 if self.running:
+                    set_stereo_volume(GAME_LOGIC.PLAYER, (2.5 + self.x, 2.0, -0.8), self.channel)
                     self.x -= DISPLAY.delta_time * 2.5
                     if self.x <= 0:
+                        self.channel.stop()
                         if not GAME_LOGIC.door_open:
-                            # TODO: sound hurt the door
+                            self.channel.play(self.door_hit_sound)
                             self.state = 1
                             GAME_LOGIC.time_stopped = False
                             self.x = 1.0
@@ -476,7 +500,7 @@ class Guest(Monster):
                                 GAME_OVER_SCREEN.killer = "guest"
                                 GAME_LOGIC.game_over()
                                 return
-                            # TODO: sound can't find you
+                            self.lost_sound.play()
                             self.timer = 20.
                             self.x = 4.5
                             self.running = False
@@ -487,11 +511,13 @@ class Guest(Monster):
                         GAME_OVER_SCREEN.killer = "guest"
                         GAME_LOGIC.game_over()
                     return
-                if (GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light) and GAME_LOGIC.door_open and not GAME_LOGIC.time_stopped:
-                    self.running = True
-                    self.scream_sound.play()
-                    GAME_LOGIC.time_stopped = True
-                    return
+                if GAME_LOGIC.door_open:
+                    if (GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light) and not GAME_LOGIC.time_stopped:
+                        self.running = True
+                        self.channel.play(self.running_sound)
+                        self.scream_sound.play()
+                        GAME_LOGIC.time_stopped = True
+                        return
             case 3:
                 if GAME_LOGIC.door_open:
                     if GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light:
@@ -503,7 +529,7 @@ class Guest(Monster):
                                 GAME_OVER_SCREEN.killer = "guest"
                                 GAME_LOGIC.game_over()
                                 return
-                            # TODO: sound can't find you
+                            self.lost_sound.play()
                             self.timer = 20.
                             self.x = 4.5
                             self.running = False
@@ -516,7 +542,8 @@ class Guest(Monster):
                         GAME_OVER_SCREEN.killer = "guest"
                         GAME_LOGIC.game_over()
                         return
-                    # TODO: play breath sound
+                    if self.breath_sound.get_num_channels() == 0:
+                        self.breath_sound.play()
 
         if GAME_LOGIC.time_stopped and self.state < 3:
             return
@@ -538,11 +565,10 @@ class Guest(Monster):
                     self.x = 4.5
                     self.running = False
                 case 3:
-                    self.timer = 20.
+                    self.timer = 30.
                     GAME_LOGIC.time_stopped = True
                 case 4:
                     GAME_LOGIC.door_open = True
-                    # TODO: sound door open
                     if GAME_LOGIC.PLAYER.in_wardrobe:
                         if GAME_LOGIC.PLAYER.use_flashlight:
                             GAME_OVER_SCREEN.reason = "The Guest saw your flashlight in the closet.\n" \
@@ -551,7 +577,7 @@ class Guest(Monster):
                             GAME_OVER_SCREEN.killer = "guest"
                             GAME_LOGIC.game_over()
                             return
-                        # TODO: sound can't find you
+                        self.lost_sound.play()
                         self.timer = 20.
                         self.x = 4.5
                         self.running = False

@@ -298,7 +298,7 @@ class TeddyBear(Interaction):
         ))
         self.image: Surface = load_image("data", "images", "props", "teddy_bear.png")
         self.sound: Sound = Sound(join_path("data", "sounds", "sfx", "plush_lost.ogg"))
-        self.channel: Channel = Channel(3)
+        self.channel: Channel = Channel(2)
         set_stereo_volume(GAME_LOGIC.PLAYER, self.pos, self.channel)
         self.channel.play(self.sound)
 
@@ -401,7 +401,7 @@ class Window(Interaction):
         self.close_sound: Sound = Sound(join_path("data", "sounds", "sfx", "window_close.ogg"))
         self.wind_sound: Sound = Sound(join_path("data", "sounds", "sfx", "wind_and_crickets.ogg"))
 
-        self.channel: Channel = Channel(4)
+        self.channel: Channel = Channel(3)
         set_stereo_volume(GAME_LOGIC.PLAYER, self.pos, self.channel, volume=0.0)
         self.channel.play(self.wind_sound, loops=-1)
 
