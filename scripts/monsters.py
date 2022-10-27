@@ -56,6 +56,7 @@ class Hangman(Monster):
     def update(self):
         """Update the monster each frame."""
         if not self.aggressiveness:
+            self.channel.stop()
             return
 
         if self.state:
@@ -1081,6 +1082,7 @@ class Hallucination(Monster):
             Sound(join_path('data', 'sounds', 'phone_rec', 'hes_missing_goerges.ogg')),
             Sound(join_path('data', 'sounds', 'phone_rec', 'hes_watching_seeyou.ogg')),
         )
+        self.sound_to_play: int = 0
 
         self.image: Surface = load_image("data", "images", "monsters", "The_guy.png")
 
@@ -1094,6 +1096,9 @@ class Hallucination(Monster):
         if not self.aggressiveness:
             return
 
+        if GAME_LOGIC.time_stopped:
+            return
+
         if self.spawn:
             self.x = randint(-1, 2)
             self.z = randint(-2, 3)
@@ -1102,13 +1107,15 @@ class Hallucination(Monster):
                 if (not GAME_LOGIC.PLAYER.use_flashlight and not GAME_LOGIC.PLAYER.bedside_light) or not GAME_LOGIC.PLAYER.is_looking_at((self.x, 1.4, self.z), 2.0):
                     self.spawn = False
                     self.is_here = True
+                    self.timer += 5.
                     return
 
         if self.is_here:
-            if distance_2d((self.x, 0.0, self.z), GAME_LOGIC.PLAYER.pos) < 1.2 or (GAME_LOGIC.PLAYER.is_looking_at((self.x, 1.4, self.z), 1.3) and (GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light)):
+            if distance_2d((self.x, 0.0, self.z), GAME_LOGIC.PLAYER.pos) < 1.2 or (GAME_LOGIC.PLAYER.is_looking_at((self.x, 1.4, self.z), 1.1) and (GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light)):
                 self.is_here = False
                 VISUALS.screamer = 1.0
-                Sound(join_path('data', 'sounds', 'sfx', random_choice(('scr0', 'scr1', 'scr2', 'scr3')) + '.ogg')).play()
+                Sound(join_path('data', 'sounds', 'sfx', ('scr0', 'scr1', 'scr2', 'scr3')[self.sound_to_play] + '.ogg')).play()
+                self.sound_to_play = (self.sound_to_play + 1) % 4
 
         self.timer -= DISPLAY.delta_time * randint(0, 2)
         if self.timer <= 0.:

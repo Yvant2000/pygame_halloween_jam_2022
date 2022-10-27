@@ -3,7 +3,7 @@ from random import randint, choice as random_choice
 
 from pygame import Surface
 from pygame.transform import scale, flip
-from pygame.mixer import music as pg_music
+from pygame.mixer import music as pg_music, Sound
 
 from scripts.player_controler import Player
 from scripts.display import DISPLAY
@@ -17,6 +17,8 @@ from scripts.utils import GameState, join_path
 
 from nostalgiaeraycasting import RayCaster
 from nostalgiaefilters import distortion
+
+why_are_you_leaving_sound: Sound = Sound(join_path("data", "sounds", "whisper", "why_are_you_leaving.ogg"))
 
 
 class GAME_LOGIC:
@@ -57,7 +59,7 @@ class GAME_LOGIC:
         VISUALS.vignette = 5.
 
         cls.HOUR_DURATION = 60.
-        cls.remaining_time = 45.
+        cls.remaining_time = 20.
         cls.hour = 0
 
         cls.PLAYER = Player()
@@ -129,10 +131,24 @@ class GAME_LOGIC:
         TEXT.add("Move with WASD.", duration=3, fade_out=0, force=True)
         TEXT.add("Interact with LEFT CLICK.", force=True)
 
-        VISUALS.madness = 0
-
     @classmethod
     def update(cls) -> None:
+        if cls.PLAYER.x > 2.12:
+            if cls.door_open:
+                VISUALS.vignette = VISUALS.min_vignette + 3 * (cls.PLAYER.x - 2.08) / .49
+                VISUALS.distortion = VISUALS.min_distortion + 5 * (cls.PLAYER.x - 2.08) / .49
+                VISUALS.shake = (cls.PLAYER.x - 2.08) / .49
+                if cls.PLAYER.x > 2.3:
+                    if why_are_you_leaving_sound.get_num_channels() < 1:
+                        why_are_you_leaving_sound.play()
+                    if len(TEXT.text_list) < 2:
+                        TEXT.add(
+                            f"{' ' * randint(0, 6) + 'WHY ARE YOU LEAVING ?': ^36}",
+                            duration=0.09, fade_out=0., color=(45, 5, 5), font="HelpMe",
+                            y=randint(50, DISPLAY.screen_size[1] - 50), size=int(32)
+                        )
+            else:
+                cls.PLAYER.x = 2.08
 
         if not pg_music.get_busy() and cls.hour > 1:
             if not randint(0, int(120 / DISPLAY.delta_time)):
@@ -168,7 +184,9 @@ class GAME_LOGIC:
             monster.update()
 
         if not cls.time_stopped:
-            cls.remaining_time -= DISPLAY.delta_time
+            if cls.ENDLESS or cls.hour > 0 or not cls.phone_alert:
+                cls.remaining_time -= DISPLAY.delta_time
+
             if cls.remaining_time <= 0:
                 cls.hour += 1
                 VISUALS.min_vignette += 0.05
@@ -218,7 +236,7 @@ class GAME_LOGIC:
                             cls.monster_list["Mimic"].aggressiveness = 5
                             cls.monster_list["Watcher"].aggressiveness = 8
                             cls.monster_list["Guest"].aggressiveness = 7
-                            cls.monster_list["Dad"].aggressiveness = 15
+                            cls.monster_list["Dad"].aggressiveness = 12
                         case 9:
                             cls.monster_list["Dad"].aggressiveness = 7
                             cls.monster_list["Mom"].aggressiveness = 8
@@ -235,6 +253,9 @@ class GAME_LOGIC:
                                 monster.state = 0
                                 monster.aggressiveness = 0
                             cls.win = True
+                            pg_music.stop()
+                            pg_music.load(join_path("data", "sounds", "sfx", "birds.ogg"))
+                            pg_music.play(fade_ms=10000)
                             cls.HOUR_DURATION = 10.
                         case 11:
                             GAME_OVER_SCREEN.killer = ""

@@ -15,8 +15,11 @@ MAP_COLLISIONS: tuple[Rect, ...] = (
     Rect(-30, 35, 60, 10),  # bed side
     Rect(-30, -40, 60, 10),  # back
 
-    Rect(-30, -50, 10, 90),  # left
-    Rect(25, -50, 10, 90),  # right
+    Rect(-50, -50, 30, 90),  # left
+
+    Rect(25, -50, 10, 38),  # right
+    Rect(25, -2, 10, 100),  # right
+    Rect(30, -50, 10, 100),  # right
 
     Rect(-7, 15, 16, 20),  # bed
     Rect(13, 30, 6, 5),  # nightstand

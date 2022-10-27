@@ -234,6 +234,7 @@ class BabyPhone(Interaction):
         self.channel: Channel = Channel(1)
         self.default_sound: Sound = Sound(join_path("data", "sounds", "sfx", "white_noise.ogg"))
         self.stopped_time: bool = False
+        self.timer: float = 0.
 
     def can_interact(self, player) -> bool:
         if self.channel.get_busy():
@@ -357,6 +358,8 @@ class BabyPhone(Interaction):
                     print(f"File not found: {hour}.ogg")
 
     def update(self, player):
+        self.timer += DISPLAY.delta_time
+
         if self.channel.get_busy():
             set_stereo_volume(GAME_LOGIC.PLAYER, self.pos, self.channel)
             return add_surface_toward_player_2d(
@@ -372,7 +375,7 @@ class BabyPhone(Interaction):
             self.stopped_time = False
             GAME_LOGIC.time_stopped = False
 
-        if GAME_LOGIC.phone_alert and int(GAME_LOGIC.remaining_time * 1.8) % 2:
+        if GAME_LOGIC.phone_alert and int(self.timer * 1.8) % 2:
             if self.bip_sound.get_num_channels() == 0:
                 self.bip_sound.set_volume(max(0., 1. - distance(player.pos, self.pos) / 7.))
                 self.bip_sound.play()
