@@ -186,7 +186,7 @@ class GAME_OVER_SCREEN:
             cls.screamer_duration -= DISPLAY.delta_time
             DISPLAY.display_scaled(cls.screamer_surface)
             VISUALS.shake = 1.0
-            VISUALS.fish_eye = 0.6
+            VISUALS.fish_eye = 0.3
             VISUALS.display()
 
         return False

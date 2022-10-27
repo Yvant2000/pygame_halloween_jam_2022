@@ -463,7 +463,7 @@ class Guest(Monster):
         self.state = 0
         self.running: bool = False
 
-        self.eye_image: Surface = load_image("data", "images", "monsters", "guest_eye.png")
+        self.eye_image: Surface = load_image("data", "images", "monsters", "The_guest_eye.png")
         self.running_images: list[Surface] = [load_image("data", "images", "monsters", f"The_guest_0{i+1}.png") for i in range(8)]
 
         self.scream_sound: Sound = Sound(join_path("data", "sounds", "sfx", "guest_scream.ogg"))
@@ -476,8 +476,6 @@ class Guest(Monster):
         self.channel: Channel = Channel(6)
         self.channel.set_volume(0., 0.)
         self.running_sound: Sound = Sound(join_path("data", "sounds", "sfx", "guest_running.ogg"))
-
-        self.aggressiveness = 20
 
     def update(self):
         if not self.aggressiveness:
@@ -627,7 +625,7 @@ class Guest(Monster):
             case 1:
                 GAME_LOGIC.RAY_CASTER.add_surface(
                     self.eye_image,
-                    8.0 - self.x, 2.0, -0.2,
+                    8.0 - self.x, 1.8, -0.2,
                     8.0 - self.x, 0.0, -1.4,
                     rm=True,
                 )
@@ -642,7 +640,7 @@ class Guest(Monster):
                 else:
                     GAME_LOGIC.RAY_CASTER.add_surface(
                         self.eye_image,
-                        7.0, 2.0, -0.2,
+                        7.0, 1.8, -0.2,
                         7.0, 0.0, -1.4,
                         rm=True,
                     )
@@ -664,6 +662,8 @@ class Mom(Monster):
         self.channel.set_volume(0)
         self.heartbeat_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'heartbeat.ogg'))
 
+        self.mom_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'mom.ogg'))
+
     def update(self):
         if not self.aggressiveness:
             return
@@ -677,6 +677,7 @@ class Mom(Monster):
                     self.timer = 10.
                     self.light = True
                     self.light_sound.play()
+                    self.mom_sound.play()
                 return
 
             if not GAME_LOGIC.PLAYER.in_bed:
