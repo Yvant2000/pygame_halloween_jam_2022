@@ -157,10 +157,10 @@ class GAME_OVER_SCREEN:
                 else:
                     DISPLAY.screen.blit(cls.win_image, (0, 0))
 
-                if cls.alpha >= 1:
-                    if INPUT.confirm():
-                        VISUALS.reset()
-                        return True
+            if cls.alpha >= 1:
+                if INPUT.confirm():
+                    VISUALS.reset()
+                    return True
 
             TEXT.update()
 

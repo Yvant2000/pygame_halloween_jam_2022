@@ -95,7 +95,7 @@ class GAME_LOGIC:
                 list(cls.monster_list.values())[i].aggressiveness = 20
 
         # cls.monster_list["Hangman"].aggressiveness = 20
-        # cls.monster_list["Mimic"].aggressiveness = 20
+        cls.monster_list["Mimic"].aggressiveness = 20
         # cls.monster_list["Crawler"].aggressiveness = 20
         # cls.monster_list["Mom"].aggressiveness = 20
         # cls.monster_list["Dad"].aggressiveness = 20
@@ -293,7 +293,7 @@ class GAME_LOGIC:
 
             cls.RAY_CASTER.raycasting(
                 cls.SURFACE,
-                -0.4, cls.PLAYER.height, -3.4 - max(0., cls.watcher_hands * 0.2),
+                -0.4, cls.PLAYER.height, -3.4 - max(0., cls.watcher_hands * 0.19),
                 0,
                 90,
                 DISPLAY.FOV,
@@ -314,7 +314,7 @@ class GAME_LOGIC:
                 if cls.watcher_hands >= 1.0:
                     cls.game_over()
                     return
-                cls.watcher_hands += DISPLAY.delta_time * 2.5
+                cls.watcher_hands += DISPLAY.delta_time * 2.3
         else:
             if cls.PLAYER.use_flashlight:
                 cls.RAY_CASTER.add_light(

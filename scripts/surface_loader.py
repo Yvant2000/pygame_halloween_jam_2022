@@ -46,8 +46,6 @@ def load_static_surfaces(caster: RayCaster) -> None:
 
     # CORRIDOR
 
-    from scripts.utils import repeat_texture
-
     caster.add_surface(
         load_image("data", "images", "textures", "corridor_wall.png"),
         2.501, 2.3, -0.4,

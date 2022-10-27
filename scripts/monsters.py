@@ -304,7 +304,11 @@ class Crawler(Monster):
     def __init__(self):
         super().__init__()
         self.hand_image: Surface = load_image("data", "images", "monsters", "crawler_hand.png")
-        self.monster_image: Surface = load_image("data", "images", "monsters", "crawler.png")
+        self.monster_images: tuple[Surface, ...] = (
+            load_image("data", "images", "monsters", "The_crawling_thing_3.png"),
+            load_image("data", "images", "monsters", "The_crawling_thing_1.png"),
+            load_image("data", "images", "monsters", "The_crawling_thing_2.png"),
+        )
 
         self.timer = 20.
 
@@ -363,21 +367,21 @@ class Crawler(Monster):
         elif self.state == 2:
             set_stereo_volume(GAME_LOGIC.PLAYER, (self.x, 0, self.z), self.channel)
             self.timer -= DISPLAY.delta_time
-            if len(TEXT.text_list) < 2:
+            if len(TEXT.text_list) < 2 and not (GAME_LOGIC.PLAYER.in_bed or GAME_LOGIC.PLAYER.in_wardrobe):
                 TEXT.add(
                     " " * randint(0, 8) + "HIDE" + " " * randint(0, 8),
                     duration=0.08, fade_out=0., color=(50, 5, 5), font="HelpMe",
                     y=randint(50, DISPLAY.screen_size[1] - 50), size=32
                 )
-            VISUALS.fish_eye = 0.8
+            VISUALS.fish_eye = VISUALS.min_fish_eye + 0.2
             if self.timer <= 0:
                 self.timer = 1.0
                 target = GAME_LOGIC.PLAYER.pos if not (GAME_LOGIC.PLAYER.in_wardrobe or GAME_LOGIC.PLAYER.in_bed) else (0, 0, 1.3)
 
                 self.angle_y = atan2(target[0] - self.x, target[2] - self.z)
 
-                self.x += sin(self.angle_y) * 0.5
-                self.z += cos(self.angle_y) * 0.5
+                self.x += sin(self.angle_y) * 0.4
+                self.z += cos(self.angle_y) * 0.4
 
                 if distance_2d((self.x, 0.0, self.z), target) < 1.0:
                     if GAME_LOGIC.PLAYER.in_wardrobe or GAME_LOGIC.PLAYER.in_bed:
@@ -434,7 +438,7 @@ class Crawler(Monster):
                 add_surface_toward_player_2d(
                     GAME_LOGIC.RAY_CASTER,
                     GAME_LOGIC.PLAYER,
-                    self.monster_image,
+                    self.monster_images[int((1. - min(1., self.timer)) / 0.3) % 3],
                     (self.x, 0, self.z),
                     0.7,
                     0.7,
@@ -896,6 +900,9 @@ class Watcher(Monster):
                     return
 
     def draw(self):
+        if GAME_LOGIC.PLAYER.in_wardrobe:
+            return
+
         match self.state:
             case 1:
                 if GAME_LOGIC.PLAYER.use_flashlight:
@@ -1008,6 +1015,10 @@ class Eye(Monster):
         if self.window.y < 0.5:
             self.window.y += DISPLAY.delta_time * 0.015
             return
+
+        if GAME_LOGIC.PLAYER.in_wardrobe:
+            self.state = 0
+            timer = 0.
 
         GAME_OVER_SCREEN.reason = "The Eye in the night got you.\n" \
                                   "You must not let him open the window.\n" \
