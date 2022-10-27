@@ -464,7 +464,7 @@ class Guest(Monster):
         self.running: bool = False
 
         self.eye_image: Surface = load_image("data", "images", "monsters", "guest_eye.png")
-        self.running_image: Surface = load_image("data", "images", "monsters", "guest_running.png")
+        self.running_images: list[Surface] = [load_image("data", "images", "monsters", f"The_guest_0{i+1}.png") for i in range(8)]
 
         self.scream_sound: Sound = Sound(join_path("data", "sounds", "sfx", "guest_scream.ogg"))
 
@@ -477,8 +477,10 @@ class Guest(Monster):
         self.channel.set_volume(0., 0.)
         self.running_sound: Sound = Sound(join_path("data", "sounds", "sfx", "guest_running.ogg"))
 
+        self.aggressiveness = 20
+
     def update(self):
-        if not self.aggressiveness or GAME_LOGIC.monster_list["Mom"].state or GAME_LOGIC.monster_list["Dad"].state:
+        if not self.aggressiveness:
             return
 
         match self.state:
@@ -531,6 +533,9 @@ class Guest(Monster):
                         GAME_LOGIC.game_over()
                     return
                 if GAME_LOGIC.door_open:
+                    if GAME_LOGIC.monster_list["Mom"].state or GAME_LOGIC.monster_list["Dad"].state:
+                        return
+
                     if GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light:
                         if GAME_LOGIC.time_stopped:
                             self.state = 1
@@ -629,8 +634,8 @@ class Guest(Monster):
             case 2:
                 if self.running:
                     GAME_LOGIC.RAY_CASTER.add_surface(
-                        self.running_image,
-                        2.5 + self.x, 2.0, -0.4,
+                        self.running_images[int(self.x * 4.5) % 8],
+                        2.5 + self.x, 1.8, -0.4,
                         2.5 + self.x, 0.0, -1.6,
                         rm=True,
                     )
@@ -753,6 +758,7 @@ class Dad(Monster):
         self.channel: Channel = Channel(10)
         self.channel.set_volume(0)
         self.heartbeat_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'heartbeat.ogg'))
+        self.scream_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'dad.ogg'))
 
     def update(self):
         if not self.aggressiveness:
@@ -801,6 +807,7 @@ class Dad(Monster):
                 if not GAME_LOGIC.door_open:
                     self.open_door_sound.play()
                 self.channel.play(self.heartbeat_sound, -1)
+                self.scream_sound.play()
             else:
                 self.channel.stop()
                 GAME_LOGIC.time_stopped = False

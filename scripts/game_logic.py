@@ -143,12 +143,14 @@ class GAME_LOGIC:
                         why_are_you_leaving_sound.play()
                     if len(TEXT.text_list) < 2:
                         TEXT.add(
-                            f"{' ' * randint(0, 6) + 'WHY ARE YOU LEAVING ?': ^36}",
-                            duration=0.09, fade_out=0., color=(45, 5, 5), font="HelpMe",
+                            f"{' ' * randint(0, 12) + 'WHY ARE YOU LEAVING ?': <36}",
+                            duration=0.09, fade_out=0., color=(15, 5, 5), font="HelpMe",
                             y=randint(50, DISPLAY.screen_size[1] - 50), size=int(32)
                         )
             else:
                 cls.PLAYER.x = 2.08
+        else:
+            why_are_you_leaving_sound.fadeout(100)
 
         if not pg_music.get_busy() and cls.hour > 1:
             if not randint(0, int(120 / DISPLAY.delta_time)):
