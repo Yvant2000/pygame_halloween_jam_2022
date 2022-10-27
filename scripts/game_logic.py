@@ -57,7 +57,7 @@ class GAME_LOGIC:
         VISUALS.vignette = 5.
 
         cls.HOUR_DURATION = 60.
-        cls.remaining_time = 30.
+        cls.remaining_time = 45.
         cls.hour = 0
 
         cls.PLAYER = Player()
@@ -92,8 +92,9 @@ class GAME_LOGIC:
         }
 
         if cls.ENDLESS:
+            GAME_OVER_SCREEN.get_leaderboard()
             for i in range(8):
-                list(cls.monster_list.values())[i].aggressiveness = 20
+                list(cls.monster_list.values())[i].aggressiveness = 5
 
         # cls.monster_list["Hangman"].aggressiveness = 20
         # cls.monster_list["Mimic"].aggressiveness = 20
@@ -226,6 +227,8 @@ class GAME_LOGIC:
                             cls.monster_list["Mimic"].aggressiveness = 7
                             cls.monster_list["Guest"].aggressiveness = 5
                             cls.monster_list["Hallucination"].aggressiveness = 5
+                            pg_music.load(join_path("data", "sounds", "music", "music_box.ogg"))
+                            pg_music.play(fade_ms=8000)
 
                         case 10:
                             for monster in cls.monster_list.values():

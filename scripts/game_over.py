@@ -34,6 +34,8 @@ class GAME_OVER_SCREEN:
     arcade_image: Surface = arcade_image
     best_score_image: Surface = load_image("data", "main_menu", "best_score.png")
 
+    bip_sound: Sound = Sound(join_path("data", "sounds", "sfx", "bip.ogg"))
+
     score: int = 0
     endless: bool = False
 
@@ -44,6 +46,8 @@ class GAME_OVER_SCREEN:
     press_right: bool = False
     press_up: bool = False
     validate: bool = False
+
+    leaderboard = []
 
     @classmethod
     def reset(cls, endless: bool = False, score: int = 0):
@@ -62,7 +66,7 @@ class GAME_OVER_SCREEN:
             cls.screamer_sound = Sound(join_path("data", "sounds", "screamers", f"{cls.killer}.ogg"))
             cls.screamer_sound.play()
             if not cls.endless:
-                TEXT.replace(cls.reason, duration=25, fade_out=5, color=(50, 50, 50), size=8, y=340)
+                TEXT.replace(cls.reason, duration=25, fade_out=5, color=(50, 50, 50), size=8, y=350)
         else:
             Sound(join_path("data", "sounds", "sfx", "corridor_click.ogg")).play()
             if not MAIN_MENU.main_game_beaten:
@@ -84,12 +88,16 @@ class GAME_OVER_SCREEN:
 
             cls.arcade_image = arcade_image.copy()
             y = 170
-            for i, score in enumerate(score_client.get_leaderboard()):
+            for i, score in enumerate(cls.leaderboard):
                 if i >= 5:
                     break
                 temp: Surface = font.render(f"{i + 1}. {score[0]} - {score[1]}", True, (100, 100, 150))
                 cls.arcade_image.blit(temp, (cls.arcade_image.get_width()//2 - temp.get_width()//2, y))
                 y += temp.get_height() * 1.5
+
+    @classmethod
+    def get_leaderboard(cls):
+        cls.leaderboard = score_client.get_leaderboard()
 
     @classmethod
     def update(cls) -> bool:
@@ -115,6 +123,7 @@ class GAME_OVER_SCREEN:
                 if cls.alpha >= 1:
                     if INPUT.left():
                         if not cls.press_left:
+                            cls.bip_sound.play()
                             cls.char_selected = (cls.char_selected - 1) % 3
                             cls.press_left = True
                     else:
@@ -122,6 +131,7 @@ class GAME_OVER_SCREEN:
 
                     if INPUT.right():
                         if not cls.press_right:
+                            cls.bip_sound.play()
                             cls.char_selected = (cls.char_selected + 1) % 3
                             cls.press_right = True
                     else:
@@ -129,6 +139,7 @@ class GAME_OVER_SCREEN:
 
                     if INPUT.up() or INPUT.down():
                         if not cls.press_up:
+                            cls.bip_sound.play()
                             cls.validate = not cls.validate
                             cls.press_up = True
                     else:

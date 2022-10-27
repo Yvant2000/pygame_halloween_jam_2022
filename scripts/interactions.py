@@ -229,6 +229,8 @@ class BabyPhone(Interaction):
         self.image_alert: Surface = load_image("data", "images", "props", "babyphone_alert.png")
         self.image_on: Surface = load_image("data", "images", "props", "babyphone_on.png")
 
+        self.bip_sound: Sound = Sound(join_path("data", "sounds", "sfx", "bip.ogg"))
+
         self.channel: Channel = Channel(1)
         self.default_sound: Sound = Sound(join_path("data", "sounds", "sfx", "white_noise.ogg"))
         self.stopped_time: bool = False
@@ -254,8 +256,23 @@ class BabyPhone(Interaction):
         GAME_LOGIC.time_stopped = True
         match GAME_LOGIC.hour:
             case 0:
-                ...
-                # self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"0.ogg")))
+                self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"0.ogg")))
+                TEXT.text_list = []
+                TEXT.replace("", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)  # 1.5
+                TEXT.add("Hello ?", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)  # 3.0
+                TEXT.add("Can you hear me ?", duration=1., fade_out=0., color=(50, 50, 100), force=True)  # 4.0
+                TEXT.add("Good evening my boy.", duration=1.75, fade_out=0., color=(50, 50, 100), force=True)  # 5.75
+                TEXT.add("You have a little difficulty\nto fall asleep ?", duration=2.75, fade_out=0., color=(50, 50, 100), force=True)  # 8.5
+                TEXT.add("Oh !", duration=0.5, fade_out=0., color=(50, 50, 100), force=True)  # 9.0
+                TEXT.add("It's nothing !", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)  # 10.5
+                TEXT.add("I understand.", duration=1.20, fade_out=0., color=(50, 50, 100), force=True)  # 11.75
+                TEXT.add("You know, me too at night sometimes\nI can't fall asleep.", duration=3.5, fade_out=0., color=(50, 50, 100), force=True)  # 15.25
+                TEXT.add("But you know what I do\nwhen I can't sleep ?", duration=3.1, fade_out=0., color=(50, 50, 100), force=True)  # 18.5
+                TEXT.add("I play with my friends !", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)  # 20.
+                TEXT.add("Do you want to play with us ?", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)  # 21.5
+                TEXT.add("You'll see,\nwe'll have a lot of fun !", duration=2.5, fade_out=0., color=(50, 50, 100), force=True)  # 24.0
+                TEXT.add("How about we start\nwith a little lullaby...", duration=2.8, fade_out=0., color=(50, 50, 100), force=True)  # 27.0
+                TEXT.add("...To explain the rules to you.", duration=3.0, fade_out=2.5, color=(100, 50, 50), force=True)
             case 1:
                 self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"1.ogg")))
                 TEXT.replace("", duration=4.5, fade_out=0., color=(50, 50, 100), force=True)
@@ -332,8 +349,7 @@ class BabyPhone(Interaction):
                 TEXT.add("Dad may be blind,", duration=3.0, fade_out=0., color=(50, 50, 100), force=True)  # 17.
                 TEXT.add("But he still ears you.", duration=2.50, fade_out=2.5, color=(100, 50, 50), force=True)
             case 9:
-                # self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"9.ogg")))
-                Sound(join_path("data", "sounds", "phone_rec", f"music_box.ogg")).play()
+                self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"9.ogg")))
             case hour:
                 try:
                     self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"{hour}.ogg")))
@@ -357,6 +373,9 @@ class BabyPhone(Interaction):
             GAME_LOGIC.time_stopped = False
 
         if GAME_LOGIC.phone_alert and int(GAME_LOGIC.remaining_time * 1.8) % 2:
+            if self.bip_sound.get_num_channels() == 0:
+                self.bip_sound.set_volume(max(0., 1. - distance(player.pos, self.pos) / 7.))
+                self.bip_sound.play()
             # {"z", "y", "z", "intensity", "red", "green", "blue", "direction_x", "direction_y", "direction_z", NULL};
             GAME_LOGIC.RAY_CASTER.add_light(
                 *self.pos,

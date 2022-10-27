@@ -125,7 +125,6 @@ class Hangman(Monster):
 
 class Mimic(Monster):
     def __init__(self):
-        # TODO: Sounds
         super().__init__()
 
         self.front_image: Surface = load_image("data", "images", "props", "chest_front.png")
@@ -145,6 +144,10 @@ class Mimic(Monster):
         self.angle_y: float = 0
 
         self.teddy_bear: TeddyBear | None = None
+
+        self.move_sound = Sound(join_path("data", "sounds", "sfx", "spider_step.ogg"))
+        self.channel: Channel = Channel(11)
+        self.channel.set_volume(0, 0)
 
     def update(self):
         """Update the monster each frame."""
@@ -166,6 +169,8 @@ class Mimic(Monster):
             # move the monster toward the target
             self.x += sin(self.angle_y) * DISPLAY.delta_time * 2
             self.z += cos(self.angle_y) * DISPLAY.delta_time * 2
+
+            set_stereo_volume(GAME_LOGIC.PLAYER, (self.x, 0.5, self.z), self.channel)
 
             if distance_2d((self.x, 0.0, self.z), target) < 1.0:
                 if target == GAME_LOGIC.PLAYER.pos:
@@ -204,6 +209,7 @@ class Mimic(Monster):
                     self.timer = 5.
                     GAME_LOGIC.time_stopped = True
                 case 4:
+                    self.channel.play(self.move_sound, loops=-1)
                     self.timer = 25.
                     self.x = -2.2
                     self.z = -0.3
@@ -219,6 +225,7 @@ class Mimic(Monster):
         self.teddy_bear = None
         self.x = 0
         self.z = 0
+        self.channel.stop()
 
     def draw(self):
         """Draw the monster each frame."""
@@ -647,6 +654,10 @@ class Mom(Monster):
         self.open_door_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'door_open_fast.ogg'))
         self.light_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'corridor_click.ogg'))
 
+        self.channel: Channel = Channel(10)
+        self.channel.set_volume(0)
+        self.heartbeat_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'heartbeat.ogg'))
+
     def update(self):
         if not self.aggressiveness:
             return
@@ -675,7 +686,8 @@ class Mom(Monster):
 
             VISUALS.fish_eye = self.angriness + VISUALS.min_fish_eye
             VISUALS.vignette = self.angriness + VISUALS.min_vignette
-            #TODO: sound mom angry
+            self.channel.set_volume(self.angriness)
+
             if len(TEXT.text_list) < 2:
                 TEXT.add(
                     " " * randint(0, 5) + "GO TO BED" + " " * randint(0, 5),
@@ -699,11 +711,12 @@ class Mom(Monster):
                 self.light = False
                 if not GAME_LOGIC.door_open:
                     self.open_door_sound.play()
-                # TODO: sound mom
+                self.channel.play(self.heartbeat_sound, loops=-1)
             else:
                 GAME_LOGIC.time_stopped = False
                 self.timer = 50.
                 self.light_sound.play()
+                self.channel.stop()
 
         if GAME_LOGIC.time_stopped:
             return
@@ -736,6 +749,9 @@ class Dad(Monster):
 
         self.open_door_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'door_open_fast.ogg'))
         self.light_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'corridor_click.ogg'))
+        self.channel: Channel = Channel(10)
+        self.channel.set_volume(0)
+        self.heartbeat_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'heartbeat.ogg'))
 
     def update(self):
         if not self.aggressiveness:
@@ -760,10 +776,10 @@ class Dad(Monster):
                         duration=0.08, fade_out=0., color=(70, 5, 5), font="HelpMe",
                         y=randint(50, DISPLAY.screen_size[1] - 50), size=int(32 * (1 + self.angriness))
                     )
-                # TODO: sound dad angry
 
             VISUALS.shake = self.angriness + VISUALS.min_shake
             VISUALS.distortion = self.angriness + VISUALS.min_distortion
+            self.channel.set_volume(self.angriness)
 
             if self.angriness > 1.0:
                 GAME_OVER_SCREEN.reason = "Dad will get angry if you move.\n" \
@@ -783,8 +799,9 @@ class Dad(Monster):
                 self.light = False
                 if not GAME_LOGIC.door_open:
                     self.open_door_sound.play()
-                # TODO: sound dad
+                self.channel.play(self.heartbeat_sound, -1)
             else:
+                self.channel.stop()
                 GAME_LOGIC.time_stopped = False
                 self.timer = 60.
                 self.light_sound.play()
@@ -984,7 +1001,6 @@ class Eye(Monster):
             VISUALS.shake = self.fear
             VISUALS.vignette = self.fear
             if self.fear >= 1.0:
-                # TODO: sound eye caught
                 self.state = 0
                 self.chanel.stop()
                 self.timer = 10.
@@ -1000,7 +1016,6 @@ class Eye(Monster):
                            * randint(1, 4) / 4
                            * (0.5 * (GAME_LOGIC.PLAYER.use_flashlight + GAME_LOGIC.PLAYER.bedside_light * 2)))
             if self.timer <= 0:
-                # TODO: sound eye wisper
                 self.state = True
                 self.chanel.set_volume(0)
                 self.chanel.play(self.scared_sound, loops=-1)
@@ -1014,7 +1029,7 @@ class Eye(Monster):
                        * (0.5 * (GAME_LOGIC.PLAYER.use_flashlight + GAME_LOGIC.PLAYER.bedside_light * 2)))
             if self.x <= 0:
                 self.x = 0
-                #TODO: sound eye knock window
+                # TODO: sound eye knock window
             return
 
         if self.window.y < 0.5:
@@ -1042,7 +1057,7 @@ class Eye(Monster):
                 GAME_LOGIC.RAY_CASTER,
                 GAME_LOGIC.PLAYER,
                 temp,
-                (2.8 + self.x, 0.0, 1.6),
+                (2.9 + self.x, 0.0, 1.6),
                 0.8, 2.0
             )
             return
@@ -1051,7 +1066,7 @@ class Eye(Monster):
             GAME_LOGIC.RAY_CASTER,
             GAME_LOGIC.PLAYER,
             self.dark_image,
-            (2.8 + self.x, 0.0, 1.6),
+            (2.9 + self.x, 0.0, 1.6),
             0.8, 2.0
         )
 
@@ -1059,7 +1074,7 @@ class Eye(Monster):
 class Hallucination(Monster):
     def __init__(self):
         super().__init__()
-        self.timer = 20.
+        self.timer = 5.
         self.sounds: tuple[Sound, ...] = (
             Sound(join_path('data', 'sounds', 'phone_rec', 'chuchotage.ogg')),
             Sound(join_path('data', 'sounds', 'phone_rec', 'chuchotement_eyen_in_da_night.ogg')),
@@ -1067,14 +1082,38 @@ class Hallucination(Monster):
             Sound(join_path('data', 'sounds', 'phone_rec', 'hes_watching_seeyou.ogg')),
         )
 
+        self.image: Surface = load_image("data", "images", "monsters", "The_guy.png")
+
+        self.spawn: bool = False
+        self.is_here: bool = False
+
+        self.x: float = 0
+        self.z: float = 0
+
     def update(self):
         if not self.aggressiveness:
             return
 
+        if self.spawn:
+            self.x = randint(-1, 2)
+            self.z = randint(-2, 3)
+
+            if distance_2d((self.x, 0.0, self.z), GAME_LOGIC.PLAYER.pos) > 1.5:
+                if (not GAME_LOGIC.PLAYER.use_flashlight and not GAME_LOGIC.PLAYER.bedside_light) or not GAME_LOGIC.PLAYER.is_looking_at((self.x, 1.4, self.z), 2.0):
+                    self.spawn = False
+                    self.is_here = True
+                    return
+
+        if self.is_here:
+            if distance_2d((self.x, 0.0, self.z), GAME_LOGIC.PLAYER.pos) < 1.2 or (GAME_LOGIC.PLAYER.is_looking_at((self.x, 1.4, self.z), 1.3) and (GAME_LOGIC.PLAYER.use_flashlight or GAME_LOGIC.PLAYER.bedside_light)):
+                self.is_here = False
+                VISUALS.screamer = 1.0
+                Sound(join_path('data', 'sounds', 'sfx', random_choice(('scr0', 'scr1', 'scr2', 'scr3')) + '.ogg')).play()
+
         self.timer -= DISPLAY.delta_time * randint(0, 2)
         if self.timer <= 0.:
             self.timer = 25. - self.aggressiveness
-            match randint(0, 3):
+            match randint(0, 4):
                 case 0:
                     VISUALS.madness += 0.03
                     return
@@ -1093,5 +1132,19 @@ class Hallucination(Monster):
                     random_choice(list(GAME_LOGIC.monster_list.values())).aggressiveness += 1
                     return
 
+                case 4:
+                    self.spawn = True
+
     def draw(self):
-        ...
+        if not self.aggressiveness:
+            return
+
+        if not self.is_here:
+            return
+
+        add_surface_toward_player_2d(
+            GAME_LOGIC.RAY_CASTER,
+            GAME_LOGIC.PLAYER,
+            self.image,
+            (self.x, 0.0, self.z),
+            1.5, 2.0)

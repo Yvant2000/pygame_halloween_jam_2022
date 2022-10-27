@@ -27,7 +27,6 @@ class GAME:
     @classmethod
     def main(cls):
         while True:
-            print(MAIN_MENU.quality)
             cls.events_handler()
             INPUT.update()
 
@@ -49,6 +48,9 @@ class GAME:
                         VISUALS.reset()
                         VISUALS.vignette = 2.0
                         cls.state = GameState.MAIN_MENU
+
+                case GameState.CREDITS:
+                    pass
 
                 case GameState.QUIT:
                     break

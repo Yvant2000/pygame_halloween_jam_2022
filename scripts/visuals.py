@@ -2,7 +2,8 @@ from math import sin
 
 
 from pygame import Surface
-
+from pygame import BLEND_SUB
+from pygame.transform import scale
 
 from scripts.display import DISPLAY
 from scripts.utils import load_image
@@ -15,6 +16,7 @@ hand_visual: Surface = load_image("data", "images", "visuals", "hand.png")
 wardrobe_visual: Surface = load_image("data", "images", "visuals", "wardrobe.png")
 watcher_hand_visual: Surface = load_image("data", "images", "visuals", "watcher_hand.png")
 madness_visual: Surface = load_image("data", "images", "visuals", "madness.png")
+screamer_visual: Surface = load_image("data", "images", "visuals", "phone_scream.png")
 
 
 class VISUALS:
@@ -36,6 +38,8 @@ class VISUALS:
 
     madness: float
 
+    screamer: float
+
     @classmethod
     def reset(cls):
         cls.vignette = 0.
@@ -55,6 +59,7 @@ class VISUALS:
         cls.min_fried = 0.
 
         cls.madness = 0.
+        cls.screamer = 0.
 
     @classmethod
     def display(cls):
@@ -84,6 +89,25 @@ class VISUALS:
             effect.set_alpha(int(cls.distortion * 100))
             DISPLAY.screen.blit(effect, (0, 0))
             cls.distortion = max(cls.min_distortion, cls.distortion - DISPLAY.delta_time)
+
+        if cls.screamer:
+
+            zoom = min(1.75, 5.0 - cls.screamer * 4.0)
+
+            temp_w = zoom * screamer_visual.get_width() * DISPLAY.screen_size[0] / screamer_visual.get_width()
+            temp_h = zoom * DISPLAY.screen_size[1]
+            temp: Surface = scale(screamer_visual, (temp_w, temp_h))
+
+            if cls.screamer < 0.80:
+                neg = Surface((temp_w, temp_h))
+                neg.fill((255, 255, 255))
+                neg.blit(temp, (0, 0), special_flags=BLEND_SUB)
+                temp = neg
+                temp.set_alpha(int(cls.screamer * 1.25 * 255))
+
+            DISPLAY.screen.blit(temp, (DISPLAY.screen_size[0] // 2 - temp_w // 2, DISPLAY.screen_size[1] // 2 - temp_h // 2))
+
+            cls.screamer = max(0., cls.screamer - DISPLAY.delta_time)
 
         if cls.vignette:
             vignette(DISPLAY.screen, strength=cls.vignette * 5)

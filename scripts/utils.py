@@ -37,6 +37,7 @@ class GameState(Enum):
     QUIT = auto()
     PLAYING = auto()
     GAME_OVER = auto()
+    CREDITS = auto()
 
 
 def load_image(*path: str) -> Surface:
