@@ -1,11 +1,15 @@
 
 from pygame import Surface
-from pygame.mixer import Sound
+from pygame.mixer import Sound, music as pg_music
 
 from scripts.display import DISPLAY
 from scripts.input_handler import INPUT
 from scripts.visuals import VISUALS
 from scripts.utils import load_image, GameState, join_path
+
+
+pg_music.load(join_path("data", "sounds", "music", "main_menu.ogg"))
+pg_music.play()
 
 
 class Button:
@@ -48,6 +52,10 @@ class MAIN_MENU:
 
     @classmethod
     def update(cls) -> None:
+        if not pg_music.get_busy():
+            pg_music.load(join_path("data", "sounds", "music", "main_menu.ogg"))
+            pg_music.play()
+
         DISPLAY.display(cls.background_image)
 
         for i, button in enumerate(cls.BUTTONS):
@@ -61,6 +69,7 @@ class MAIN_MENU:
             from scripts.game_logic import GAME_LOGIC
             match cls.selected_button:
                 case 0:
+                    pg_music.fadeout(3000)
                     GAME_LOGIC.reset(graphics=cls.quality + 1)
                     GAME.state = GameState.PLAYING
                 case 1:
@@ -69,6 +78,7 @@ class MAIN_MENU:
                             VISUALS.fried = 1.0
                             cls.white_noise.play()
                         return
+                    pg_music.fadeout(3000)
                     GAME_LOGIC.reset(True, graphics=cls.quality + 1)
                     GAME.state = GameState.PLAYING
                 case 2:  # QUIT BUTTON
@@ -90,6 +100,8 @@ class MAIN_MENU:
                     cls.pressing_down = True
             else:
                 cls.pressing_down = False
+
+        VISUALS.distortion = 0.11
 
         VISUALS.display()
 

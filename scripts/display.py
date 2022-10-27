@@ -11,7 +11,7 @@ class DISPLAY:
     screen_size: tuple[int, int] = (640, 360)  # NO, YOU CAN'T MAKE A GAME THAT UGLY !!!!!1!
     screen: Surface = pg_display.set_mode(screen_size, FULLSCREEN | SCALED)  # 360p go brrrrrr
 
-    GAME_NAME: str = "Untitled Game"
+    GAME_NAME: str = "NOCTRUM"
     pg_display.set_caption(GAME_NAME)
     pg_display.set_icon(load_image("icon.png"))
 
@@ -34,4 +34,3 @@ class DISPLAY:
     @classmethod
     def display_scaled(cls, surface: Surface):
         scale(surface, cls.screen_size, cls.screen)
-

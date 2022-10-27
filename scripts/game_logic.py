@@ -1,8 +1,9 @@
-from random import randint
+from random import randint, choice as random_choice
 
 
 from pygame import Surface
 from pygame.transform import scale, flip
+from pygame.mixer import music as pg_music
 
 from scripts.player_controler import Player
 from scripts.display import DISPLAY
@@ -11,7 +12,7 @@ from scripts.input_handler import INPUT
 from scripts.game_over import GAME_OVER_SCREEN
 from scripts.surface_loader import load_static_surfaces
 from scripts.visuals import hand_visual, VISUALS, wardrobe_visual, watcher_hand_visual, madness_visual
-from scripts.utils import GameState
+from scripts.utils import GameState, join_path
 
 
 from nostalgiaeraycasting import RayCaster
@@ -95,7 +96,7 @@ class GAME_LOGIC:
                 list(cls.monster_list.values())[i].aggressiveness = 20
 
         # cls.monster_list["Hangman"].aggressiveness = 20
-        cls.monster_list["Mimic"].aggressiveness = 20
+        # cls.monster_list["Mimic"].aggressiveness = 20
         # cls.monster_list["Crawler"].aggressiveness = 20
         # cls.monster_list["Mom"].aggressiveness = 20
         # cls.monster_list["Dad"].aggressiveness = 20
@@ -131,6 +132,17 @@ class GAME_LOGIC:
 
     @classmethod
     def update(cls) -> None:
+
+        if not pg_music.get_busy() and cls.hour > 1:
+            if not randint(0, int(120 / DISPLAY.delta_time)):
+                pg_music.load(join_path("data", "sounds", "music", random_choice((
+                    "stretched_ambiance",
+                    "tasto_cello",
+                    "harmonic",
+                    "chatter",
+                    "choir",
+                )) + ".ogg"))
+                pg_music.play()
 
         cls.PLAYER.update()
         cls.display()

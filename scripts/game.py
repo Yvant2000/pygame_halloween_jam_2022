@@ -36,6 +36,7 @@ class GAME:
                     if SPLASH_SCREEN.update():
                         cls.state = GameState.MAIN_MENU
                         VISUALS.reset()
+                        VISUALS.vignette = 2.0
 
                 case GameState.MAIN_MENU:
                     MAIN_MENU.update()
@@ -45,6 +46,8 @@ class GAME:
 
                 case GameState.GAME_OVER:
                     if GAME_OVER_SCREEN.update():
+                        VISUALS.reset()
+                        VISUALS.vignette = 2.0
                         cls.state = GameState.MAIN_MENU
 
                 case GameState.QUIT:

@@ -237,11 +237,10 @@ class BabyPhone(Interaction):
         if self.channel.get_busy():
             return False
 
-        if GAME_LOGIC.time_stopped:
-            TEXT.replace("Watch out.", duration=0.0, fade_out=0.3, color=(100, 80, 80))
-            return False
-
         if player.is_looking_at(self.pos, 0.4) and distance(player.pos, self.pos) < 2.0:
+            if GAME_LOGIC.time_stopped:
+                TEXT.replace("Watch out.", duration=0.0, fade_out=0.3, color=(100, 80, 80))
+                return False
             TEXT.replace("Listen to the baby-phone", duration=0.0, fade_out=0.3, color=(100, 100, 100))
             return True
         return False

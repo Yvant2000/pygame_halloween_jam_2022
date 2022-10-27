@@ -622,8 +622,8 @@ class Guest(Monster):
                 if self.running:
                     GAME_LOGIC.RAY_CASTER.add_surface(
                         self.running_image,
-                        2.5 + self.x, 2.0, -0.3,
-                        2.5 + self.x, 0.0, -1.5,
+                        2.5 + self.x, 2.0, -0.4,
+                        2.5 + self.x, 0.0, -1.6,
                         rm=True,
                     )
                 else:
@@ -821,10 +821,15 @@ class Watcher(Monster):
 
         self.breath_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'watcher_breath.ogg'))
         self.scared_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'bed.ogg'))
+        self.moving_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'watcher_moving.ogg'))
+
+        self.channel: Channel = Channel(9)
 
     def update(self):
         if not self.aggressiveness or GAME_LOGIC.watcher_caught:
             return
+
+        set_stereo_volume(GAME_LOGIC.PLAYER, (-0.4, 0.0, -3.37), self.channel)
 
         if self.state == 1 or self.state == 2:
             if GAME_LOGIC.PLAYER.in_wardrobe:
@@ -873,13 +878,13 @@ class Watcher(Monster):
                 case 1:
                     self.fear = 0.
                     self.timer = 25.
-                    #TODO: sound watcher moving
+                    self.channel.play(self.moving_sound)
                 case 2:
                     self.timer = 30.
                     self.fear = 0.
-                    #TODO: sound watcher moving
+                    self.channel.play(self.moving_sound)
                 case 3:
-                    #TODO: sound watcher moving
+                    self.channel.play(self.moving_sound)
                     self.timer = 10.
                     if GAME_LOGIC.PLAYER.in_wardrobe:
                         GAME_LOGIC.watcher_caught = True
