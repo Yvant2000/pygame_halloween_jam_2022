@@ -137,7 +137,9 @@ class Mimic(Monster):
 
         self.monster_image: Surface = load_image("data", "images", "monsters", "mimic.png")
 
-        self.timer = 15.
+        self.stand_animation: list[Surface] = [
+            load_image("data", "images", "monsters", f"Steven_stand_{(i+1):0>2}.png") for i in range(13)
+        ]
 
         self.x: float = 0
         self.z: float = 0
@@ -146,16 +148,21 @@ class Mimic(Monster):
 
         self.teddy_bear: TeddyBear | None = None
 
+        self.stand_sound = Sound(join_path("data", "sounds", "sfx", "mimic_stand.ogg"))
+
         self.move_sound = Sound(join_path("data", "sounds", "sfx", "spider_step.ogg"))
         self.channel: Channel = Channel(11)
         self.channel.set_volume(0, 0)
+
+        self.timer = 15.
+        self.state = 0
 
     def update(self):
         """Update the monster each frame."""
         if not self.aggressiveness:
             return
 
-        if self.state > 3:
+        if self.state > 4:
             target = (
                 GAME_LOGIC.PLAYER.pos
                 if (not GAME_LOGIC.PLAYER.in_wardrobe or GAME_LOGIC.PLAYER.has_teddy_bear)
@@ -196,26 +203,31 @@ class Mimic(Monster):
         if GAME_LOGIC.time_stopped and self.state < 3:
             return
 
-        self.timer -= DISPLAY.delta_time * (1 + self.aggressiveness / 10) * randint(1, 3) / 3
+        if self.timer <= 3:
+            self.timer -= DISPLAY.delta_time * (1 + self.aggressiveness / 10) * randint(1, 3) / 3
+        else:
+            self.timer -= DISPLAY.delta_time
+
         if self.timer <= 0:
             self.state += 1
             match self.state:
-                case 1:
+                case 1:  # calm
                     self.timer = 10.
                     self.teddy_bear = TeddyBear()
                     GAME_LOGIC.interaction_list.insert(0, self.teddy_bear)
-                case 2:
+                case 2:  # becoming red
                     self.timer = 10.
-                case 3:
+                case 3:  # full red
                     self.timer = 5.
                     GAME_LOGIC.time_stopped = True
-                case 4:
+                case 4:  # stand up
+                    self.timer = 2.
+
+                case 5:  # walking
                     self.channel.play(self.move_sound, loops=-1)
                     self.timer = 25.
                     self.x = -2.2
                     self.z = -0.3
-                case _:
-                    ...
 
     def calm(self):
 
@@ -246,6 +258,27 @@ class Mimic(Monster):
                 )
                 self.z = 0.02 * (int(self.timer * 100) % 2 - 0.5) * temp
                 self.x = 0.016 * (int(self.timer * 100) % 2 - 0.5) * temp
+
+            case 4:  # phase last 2 seconds
+                if self.timer > 1.:
+                    self.draw_chest()
+                    frame = min(5, int((2. - self.timer) * 8))
+                    GAME_LOGIC.RAY_CASTER.add_surface(
+                        self.stand_animation[frame],
+                        -2.2 + self.x, 0.90, -1.8 + self.z,
+                        -2.2 + self.x, 0.0, 1.2 + self.z,
+                        rm=True,
+                    )
+                    if frame == 5 and self.stand_sound.get_num_channels() == 0:
+                        set_stereo_volume(GAME_LOGIC.PLAYER, (self.x, 0.5, self.z), self.channel)
+                        self.channel.play(self.stand_sound)
+                else:
+                    GAME_LOGIC.RAY_CASTER.add_surface(
+                        self.stand_animation[6 + min(6, int(7 * (1. - self.timer)))],
+                        -2.2 + self.x, 0.90, -1.8 + self.z,
+                        -2.2 + self.x, 0.0, 1.2 + self.z,
+                        rm=True,
+                    )
 
             case _:
                 GAME_LOGIC.RAY_CASTER.add_light(
