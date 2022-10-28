@@ -9,6 +9,9 @@ __pycache__/
 save.txt
 
 # Distribution / packaging
+main.build/
+main.dist/
+dlls/
 .Python
 build/
 develop-eggs/

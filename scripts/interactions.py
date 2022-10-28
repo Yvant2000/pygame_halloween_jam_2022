@@ -118,8 +118,8 @@ class PissDrawer(Interaction):
         self.sound: Sound = Sound(join_path("data", "sounds", "sfx", "white_noise_hit.ogg"))
 
     def can_interact(self, player) -> bool:
-        if player.is_looking_at(self.pos, 0.4) and distance(player.pos, self.pos) < 1.45:
-            TEXT.replace("Open piss drawer", duration=0.0, fade_out=0.3, color=(150, 150, 20))
+        if player.is_looking_at(self.pos, 0.4) and distance(player.pos, self.pos) < 1.4:
+            TEXT.replace("Open the piss drawer", duration=0.0, fade_out=0.3, color=(150, 150, 20))
             return True
         return False
 
@@ -281,16 +281,16 @@ class BabyPhone(Interaction):
                 TEXT.add("One hour passed.", duration=2.0, fade_out=2.0, color=(50, 50, 100), force=True)
                 TEXT.add("Look ! He's here ! The Eye in the night.", duration=4.0, fade_out=0., color=(50, 50, 100), force=True)
                 TEXT.add("Looking for a warm light...", duration=2.0, fade_out=0., color=(50, 50, 100), force=True)
-                TEXT.add("Give it to him while he want.", duration=2.0, fade_out=0., color=(50, 50, 100), force=True)
-                TEXT.add("Give him while you can.", duration=2.0, fade_out=2.5, color=(100, 50, 50), force=True)
+                TEXT.add("Give it to him what he wants.", duration=2.0, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("Give him all you can.", duration=2.0, fade_out=2.5, color=(100, 50, 50), force=True)
             case 2:
                 self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"2.ogg")))
                 TEXT.replace("", duration=4.5, fade_out=0., color=(50, 50, 100), force=True)
                 TEXT.add("TIC TAC", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)
                 TEXT.add("Two hours passed.", duration=2.0, fade_out=2.0, color=(50, 50, 100), force=True)
-                TEXT.add("He come from the dark;", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("He comes from the dark;", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)
                 TEXT.add("The Guest we are waiting for.", duration=2.0, fade_out=0., color=(50, 50, 100), force=True)
-                TEXT.add("He can't wait for diner...", duration=2.0, fade_out=0., color=(50, 50, 100), force=True)
+                TEXT.add("He can't waits for diner...", duration=2.0, fade_out=0., color=(50, 50, 100), force=True)
                 TEXT.add("But he have to wait outdoor...", duration=2.0, fade_out=2.5, color=(100, 50, 50), force=True)
             case 3:
                 self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"3.ogg")))
@@ -300,7 +300,7 @@ class BabyPhone(Interaction):
                 TEXT.add("Be careful !", duration=2.0, fade_out=0., color=(50, 50, 100), force=True)  # 10
                 TEXT.add("He's watching you", duration=1.5, fade_out=0., color=(50, 50, 100), force=True)  # 11.5
                 TEXT.add("Inside his house made of wood.", duration=2.5, fade_out=0., color=(50, 50, 100), force=True)  # 14
-                TEXT.add("The watcher is here and wait for you;", duration=2.5, fade_out=0.0, color=(50, 50, 100), force=True)  # 16.5
+                TEXT.add("The watcher is here and waits for you;", duration=2.5, fade_out=0.0, color=(50, 50, 100), force=True)  # 16.5
                 TEXT.add("Light is only a friend of you.", duration=2.5, fade_out=2.5, color=(100, 50, 50), force=True)  # 16.5
             case 4:
                 self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"4.ogg")))

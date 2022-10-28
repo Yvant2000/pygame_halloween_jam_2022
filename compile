@@ -1,0 +1,3 @@
+
+nuitka --python-flag=-OO --include-data-files=C:\Users\Yves-Antoine\Desktop\pygame_halloween_jam_2022\dlls\*.dll=.\ --include-data-dir=C:\Users\Yves-Antoine\Desktop\pygame_halloween_jam_2022\data\=data --follow-imports --standalone --assume-yes-for-downloads --remove-output --disable-dll-dependency-cache --show-progress --show-memory --show-modules --plugin-enable=pylint-warnings --windows-disable-console --windows-icon-from-ico=C:\Users\Yves-Antoine\Desktop\pygame_halloween_jam_2022\icon.ico main.py
+

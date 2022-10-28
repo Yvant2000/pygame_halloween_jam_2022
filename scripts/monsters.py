@@ -83,6 +83,7 @@ class Hangman(Monster):
 
             if self.madness > 1.0:
                 GAME_OVER_SCREEN.reason = "Don't look at the hangman.\n" \
+                                          "Turn off the lights if needed.\n" \
                                           "Listen carefully for the rope to know when he's coming."
                 GAME_OVER_SCREEN.killer = "hangman"
                 GAME_LOGIC.game_over()
@@ -101,8 +102,8 @@ class Hangman(Monster):
 
                 self.x, self.z = GAME_LOGIC.PLAYER.x, GAME_LOGIC.PLAYER.z
                 while distance_2d((self.x, 0.0, self.z), GAME_LOGIC.PLAYER.pos) < 1.5:
-                    self.x = randint(-1, 2)
-                    self.z = randint(-2, 3)
+                    self.x = randint(-1, 1)
+                    self.z = randint(-2, 2)
             else:
                 self.channel.stop()
                 self.danger_channel.stop()
@@ -135,10 +136,12 @@ class Mimic(Monster):
         self.top_image2: Surface = load_image("data", "images", "props", "chest_top2.png")
         self.top_image3: Surface = load_image("data", "images", "props", "chest_top3.png")
 
-        self.monster_image: Surface = load_image("data", "images", "monsters", "mimic.png")
-
         self.stand_animation: list[Surface] = [
             load_image("data", "images", "monsters", f"Steven_stand_{(i+1):0>2}.png") for i in range(13)
+        ]
+
+        self.walk_animation: list[Surface] = [
+            load_image("data", "images", "monsters", f"Steven_run_0{(i+1)}.png") for i in range(6)
         ]
 
         self.x: float = 0
@@ -260,6 +263,12 @@ class Mimic(Monster):
                 self.x = 0.016 * (int(self.timer * 100) % 2 - 0.5) * temp
 
             case 4:  # phase last 2 seconds
+                GAME_LOGIC.RAY_CASTER.add_light(
+                    -2.2, 0.2, -0.3,
+                    2.0,
+                    1.0, 0.3, 0.0,
+                )
+
                 if self.timer > 1.:
                     self.draw_chest()
                     frame = min(5, int((2. - self.timer) * 8))
@@ -289,10 +298,10 @@ class Mimic(Monster):
                 add_surface_toward_player_2d(
                     GAME_LOGIC.RAY_CASTER,
                     GAME_LOGIC.PLAYER,
-                    self.monster_image,
+                    self.walk_animation[int(self.timer * 8) % 6],
                     (self.x, 0, self.z),
-                    1.5,
-                    1.0,
+                    1.6,
+                    1.1,
                 )
 
     def draw_chest(self):
@@ -345,6 +354,8 @@ class Crawler(Monster):
     def __init__(self):
         super().__init__()
         self.hand_image: Surface = load_image("data", "images", "monsters", "crawler_hand.png")
+        self.hand_grab_image: Surface = load_image("data", "images", "monsters", "Crawler_grab.png")
+
         self.monster_images: tuple[Surface, ...] = (
             load_image("data", "images", "monsters", "The_crawling_thing_3.png"),
             load_image("data", "images", "monsters", "The_crawling_thing_1.png"),
@@ -462,19 +473,27 @@ class Crawler(Monster):
                     GAME_LOGIC.time_stopped = True
 
     def draw(self):
-
         if not self.aggressiveness or not self.state:
             return
 
         match self.state:
             case 1:
-                GAME_LOGIC.RAY_CASTER.add_surface(
-                    self.hand_image,
-                    -0.2 + (sin(self.timer * 2) / 20) * (not self.grabbed), 0.05, 1.52 + self.z,
-                    0.2 + (sin(self.timer * 2) / 20) * (not self.grabbed), 0.2 + (sin(self.timer * 1.5) / 30) * (not self.grabbed), 1.0 + self.z,
-                    -0.2 + (sin(self.timer * 2) / 20) * (not self.grabbed), 0.2 + (sin(self.timer * 1.5) / 30) * (not self.grabbed), 1.0 + self.z,
-                    rm=True,
-                )
+                if self.grabbed:
+                    GAME_LOGIC.RAY_CASTER.add_surface(
+                        self.hand_grab_image,
+                        -0.2 + (sin(self.timer * 2) / 20) * (not self.grabbed), 0.05, 1.52 + self.z,
+                        0.2 + (sin(self.timer * 2) / 20) * (not self.grabbed), 0.2 + (sin(self.timer * 1.5) / 30) * (not self.grabbed), 0.5 + self.z,
+                        -0.2 + (sin(self.timer * 2) / 20) * (not self.grabbed), 0.2 + (sin(self.timer * 1.5) / 30) * (not self.grabbed), 0.5 + self.z,
+                        rm=True,
+                    )
+                else:
+                    GAME_LOGIC.RAY_CASTER.add_surface(
+                        self.hand_image,
+                        -0.2 + (sin(self.timer * 2) / 20) * (not self.grabbed), 0.05, 1.52 + self.z,
+                        0.2 + (sin(self.timer * 2) / 20) * (not self.grabbed), 0.2 + (sin(self.timer * 1.5) / 30) * (not self.grabbed), 1.0 + self.z,
+                        -0.2 + (sin(self.timer * 2) / 20) * (not self.grabbed), 0.2 + (sin(self.timer * 1.5) / 30) * (not self.grabbed), 1.0 + self.z,
+                        rm=True,
+                    )
             case 2:
                 add_surface_toward_player_2d(
                     GAME_LOGIC.RAY_CASTER,
@@ -571,6 +590,7 @@ class Guest(Monster):
                         if GAME_LOGIC.time_stopped:
                             self.state = 1
                             self.timer = 20.
+                            self.x = 0.1
                             return
                         self.running = True
                         self.channel.play(self.running_sound)
@@ -646,7 +666,8 @@ class Guest(Monster):
                     GAME_OVER_SCREEN.reason = "The Guest will try to come to your room by the door.\n" \
                                               "If you hide in the closet, he won't find you.\n" \
                                               "You can know if he is at the door by listening to his breathing.\n" \
-                                              "But don't light up the room while he is at the door."
+                                              "But don't light up the room while he is at the door.\n" \
+                                              "If you don't hear him, you can light the corridor."
                     GAME_OVER_SCREEN.killer = "guest"
                     GAME_LOGIC.game_over()
 

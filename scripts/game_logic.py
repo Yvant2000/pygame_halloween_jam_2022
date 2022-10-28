@@ -95,7 +95,7 @@ class GAME_LOGIC:
 
         if cls.ENDLESS:
             GAME_OVER_SCREEN.get_leaderboard()
-            for i in range(8):
+            for i in range(9):
                 list(cls.monster_list.values())[i].aggressiveness = 5
 
         # cls.monster_list["Hangman"].aggressiveness = 20
@@ -240,13 +240,14 @@ class GAME_LOGIC:
                             cls.monster_list["Guest"].aggressiveness = 7
                             cls.monster_list["Dad"].aggressiveness = 12
                         case 9:
+                            cls.monster_list["Watcher"].aggressiveness = 13
                             cls.monster_list["Dad"].aggressiveness = 7
                             cls.monster_list["Mom"].aggressiveness = 8
                             cls.monster_list["Hangman"].aggressiveness = 8
                             cls.monster_list["Crawler"].aggressiveness = 8
                             cls.monster_list["Mimic"].aggressiveness = 7
                             cls.monster_list["Guest"].aggressiveness = 5
-                            cls.monster_list["Hallucination"].aggressiveness = 5
+                            cls.monster_list["Hallucination"].aggressiveness = 8
                             pg_music.load(join_path("data", "sounds", "music", "music_box.ogg"))
                             pg_music.play(fade_ms=8000)
 
@@ -259,13 +260,16 @@ class GAME_LOGIC:
                             pg_music.load(join_path("data", "sounds", "sfx", "birds.ogg"))
                             pg_music.play(fade_ms=10000)
                             cls.HOUR_DURATION = 10.
+                            VISUALS.madness = 0.
+                            VISUALS.min_distortion = 0.
+                            VISUALS.min_vignette = 0.
                         case 11:
                             GAME_OVER_SCREEN.killer = ""
                             GAME_OVER_SCREEN.reason = "You survived the night!"
                             cls.game_over()
                 else:
-                    for _ in range(3):
-                        list(cls.monster_list.values())[randint(0, 7)].aggressiveness += 1
+                    for _ in range(5):
+                        list(cls.monster_list.values())[randint(0, 8)].aggressiveness += 1
                 cls.remaining_time = cls.HOUR_DURATION
 
     @classmethod
