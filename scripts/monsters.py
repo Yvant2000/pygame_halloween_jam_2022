@@ -529,6 +529,8 @@ class Guest(Monster):
         self.channel.set_volume(0., 0.)
         self.running_sound: Sound = Sound(join_path("data", "sounds", "sfx", "guest_running.ogg"))
 
+        self.open_door_sound: Sound = Sound(join_path('data', 'sounds', 'sfx', 'door_open_fast.ogg'))
+
     def update(self):
         if not self.aggressiveness:
             return
@@ -621,7 +623,7 @@ class Guest(Monster):
                         GAME_OVER_SCREEN.killer = "guest"
                         GAME_LOGIC.game_over()
                         return
-                    if self.breath_sound.get_num_channels() == 0:
+                    if self.breath_sound.get_num_channels() == 0 and not GAME_LOGIC.PLAYER.in_wardrobe and not GAME_LOGIC.PLAYER.in_bed:
                         self.breath_sound.play()
 
         if GAME_LOGIC.time_stopped and self.state < 3:
@@ -647,7 +649,10 @@ class Guest(Monster):
                     self.timer = 30.
                     GAME_LOGIC.time_stopped = True
                 case 4:
-                    GAME_LOGIC.door_open = True
+                    if not GAME_LOGIC.door_open:
+                        GAME_LOGIC.door_open = True
+                        self.open_door_sound.play()
+
                     if GAME_LOGIC.PLAYER.in_wardrobe:
                         if GAME_LOGIC.PLAYER.use_flashlight:
                             GAME_OVER_SCREEN.reason = "The Guest saw your flashlight in the closet.\n" \
@@ -1102,6 +1107,7 @@ class Eye(Monster):
         if GAME_LOGIC.PLAYER.in_wardrobe:
             self.state = 0
             timer = 0.
+            return
 
         GAME_OVER_SCREEN.reason = "The Eye in the night got you.\n" \
                                   "You must not let him open the window.\n" \

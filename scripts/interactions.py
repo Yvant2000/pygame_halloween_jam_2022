@@ -351,6 +351,29 @@ class BabyPhone(Interaction):
                 TEXT.add("But he still ears you.", duration=2.50, fade_out=2.5, color=(100, 50, 50), force=True)
             case 9:
                 self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"9.ogg")))
+
+                TEXT.replace("TIC...", duration=2.0, fade_out=0., color=(50, 50, 100), force=True)  # 2.0
+                TEXT.add("...TAC... ", duration=2.0, fade_out=0., color=(50, 50, 100), force=True)  # 4.0
+                TEXT.add("Nine hours passed.", duration=3.0, fade_out=2.0, color=(50, 50, 100), force=True)  # 9.0
+                TEXT.add("Why does no one ever wants to\nplay with me ?", duration=4.0, fade_out=0.0, color=(50, 50, 100), force=True)  # 13.0
+                TEXT.add("Why the other kids are always\nrejecting me ?", duration=3.5, fade_out=0.0, color=(50, 50, 100), force=True)  # 16.5
+                TEXT.add("What am I doing wrong ?", duration=2.5, fade_out=0.0, color=(100, 50, 50), force=True)  # 19.0
+                TEXT.add("No.", duration=1.5, fade_out=0.0, color=(50, 50, 100), force=True)  # 20.5
+                TEXT.add("No!", duration=1.0, fade_out=0.0, color=(50, 50, 100), force=True)  # 21.5
+                TEXT.add("It's not my fault!", duration=1.0, fade_out=0.0, color=(100, 50, 50), force=True)  # 23.0
+                TEXT.add("Its the other...", duration=1.0, fade_out=0.0, color=(50, 50, 100), force=True)  # 24.0
+                TEXT.add("...who always refused to see me happy.", duration=3.0, fade_out=1.0, color=(100, 50, 50), force=True)  # 28.0
+                TEXT.add("But it already been a while\nsince that changed.", duration=2.5, fade_out=0.0, color=(50, 50, 100), force=True)  # 30.5
+                TEXT.add("All my friends...", duration=1.5, fade_out=0.0, color=(50, 50, 100), force=True)  # 32.0
+                TEXT.add("...are here with me.", duration=2.0, fade_out=0.0, color=(50, 50, 100), force=True)  # 34.0
+                TEXT.add("Forever.", duration=1.5, fade_out=0.0, color=(50, 50, 100), force=True)  # 35.5
+                TEXT.add("And ever.", duration=2.0, fade_out=0.0, color=(50, 50, 100), force=True)  # 37.5
+                TEXT.add("And soon you'll be one of them.", duration=1.5, fade_out=0.0, color=(50, 50, 100), force=True)  # 39.0
+                TEXT.add("You'll have fun with us forever.", duration=3.0, fade_out=0.0, color=(50, 50, 100), force=True)  # 42.0
+                TEXT.add("And together...", duration=1.0, fade_out=0.0, color=(50, 50, 100), force=True)  # 43.0
+                TEXT.add("We'll make new friends.", duration=2.0, fade_out=0.0, color=(50, 50, 100), force=True)  # 45.0
+                TEXT.add("I'm sure you love that idea.", duration=3.0, fade_out=3.0, color=(100, 50, 50), force=True)  # 45.0
+
             case hour:
                 try:
                     self.channel.play(Sound(join_path("data", "sounds", "phone_rec", f"{hour}.ogg")))

@@ -106,6 +106,7 @@ class GAME_LOGIC:
         # cls.monster_list["Eye"].aggressiveness = 20
         # cls.monster_list['Guest'].aggressiveness = 20
         # cls.monster_list["Watcher"].aggressiveness = 20
+        # cls.monster_list["Hallucination"].aggressiveness = 20
 
         door = Door((2.499, 1.0, -0.6))
         cls.monster_list['Mom'].door = door
@@ -152,7 +153,7 @@ class GAME_LOGIC:
         else:
             why_are_you_leaving_sound.fadeout(100)
 
-        if not pg_music.get_busy() and cls.hour > 1:
+        if not pg_music.get_busy() and 10 > cls.hour > 1:
             if not randint(0, int(120 / DISPLAY.delta_time)):
                 pg_music.load(join_path("data", "sounds", "music", random_choice((
                     "stretched_ambiance",
@@ -247,7 +248,7 @@ class GAME_LOGIC:
                             cls.monster_list["Crawler"].aggressiveness = 8
                             cls.monster_list["Mimic"].aggressiveness = 7
                             cls.monster_list["Guest"].aggressiveness = 5
-                            cls.monster_list["Hallucination"].aggressiveness = 8
+                            cls.monster_list["Hallucination"].aggressiveness = 13
                             pg_music.load(join_path("data", "sounds", "music", "music_box.ogg"))
                             pg_music.play(fade_ms=8000)
 
